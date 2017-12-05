@@ -1,0 +1,39 @@
+{
+  "name": "kollectionjs",
+  "version": "1.0.0",
+  "description": "Collection utilities inspired by kotlin for javascript",
+  "main": "index.js",
+  "repository": "https://geowarin/kollectionjs",
+  "author": "Geoffroy Warin",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "typescript": "^2.6.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^21.1.8",
+    "jest": "^21.2.1",
+    "ts-jest": "^21.2.4"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testMatch": [
+      "<rootDir>/test/**/*.(ts|tsx)"
+    ],
+    "cacheDirectory": "./.cache/jest-cache",
+    "modulePaths": [
+      "src/main"
+    ]
+  }
+
+}
