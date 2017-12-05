@@ -16,7 +16,7 @@ export class Operation {
 export class Pipeline<T> implements Iterable<T> {
   private lastOperation: Operation;
 
-  constructor(private iterable: Iterable<T>) {
+  constructor(private iterable: IterableIterator<T>) {
     this.lastOperation = new Operation(() => getIterator(iterable));
   }
 

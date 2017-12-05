@@ -1,8 +1,8 @@
-export function getIterator(iterable: any): IterableIterator<any> {
+export function getIterator<T>(iterable: IterableIterator<T> | Array<T>): IterableIterator<T> {
   return iterable [Symbol.iterator]()
 }
 
-export function isIterable(obj: any) {
+export function isIterable(obj: any): obj is Iterable<any> {
   return obj != null && typeof obj[Symbol.iterator] === 'function';
 }
 

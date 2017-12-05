@@ -1,5 +1,5 @@
 import {getIterator} from "./utils";
-import {Pipeline} from "./Pipeline";
+import {Pipeline, Operation} from "./Pipeline";
 
 export class Sequence<T> implements Iterable<T> {
   private pipeline: any;
@@ -10,6 +10,22 @@ export class Sequence<T> implements Iterable<T> {
 
   [Symbol.iterator](): Iterator<T> {
     return getIterator(this.pipeline);
+  }
+
+  filter(predicate: (item: T) => boolean): Sequence<T> {
+    this.pipeline.addOperation(
+      function* (prev: Operation) {
+        for (let val of prev.iterator()) {
+          if (predicate(val))
+            yield val;
+        }
+      }
+    );
+    return this;
+  }
+
+  toArray(): T[] {
+    return [...this];
   }
 }
 
