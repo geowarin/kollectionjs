@@ -60,6 +60,17 @@ export class Sequence<T> implements IterableIterator<T> {
     ));
   }
 
+  drop(num: number = 1): Sequence<T> {
+    return this.rewrap(function* (this: Iterable<T>) {
+        let count = 0;
+        for (let val of this) {
+          if (count++ >= num) {
+            yield val;
+          }
+        }
+      }
+    );
+  }
 
   toArray(): T[] {
     return [...this];
