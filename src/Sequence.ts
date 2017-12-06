@@ -99,6 +99,27 @@ export class Sequence<T> implements IterableIterator<T> {
     return max;
   }
 
+  associateBy<K>(keySelector: (value: T) => K): Map<K, T>;
+  associateBy<K extends keyof T>(key: K): Map<T[K], T>;
+  associateBy<K, V>(keySelector: (value: T) => K, valueTransformer: (value: T) => V): Map<K, V>;
+  associateBy<K extends keyof T, V>(key: K, valueTransformer: (value: T) => V): Map<T[K], V>;
+  associateBy<K, V>(keyOrSelector: any,
+                    valueTransform?: (value: T) => V): Map<K, V | T> {
+    const selector = typeof keyOrSelector === "function"
+      ? keyOrSelector
+      : (value: T) => value[keyOrSelector as keyof T];
+    const result = new Map<K, V | T>();
+    const transform = valueTransform != null
+      ? valueTransform
+      : (value: T) => value;
+    for (let item of this) {
+      const key = selector(item);
+      const value = transform(item);
+      result.set(key, value);
+    }
+    return result;
+  }
+
   toArray(): T[] {
     return [...this];
   }
