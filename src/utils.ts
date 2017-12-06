@@ -13,3 +13,12 @@ export function isIterable(obj: any): obj is Iterable<any> {
 export function entries<T>(obj: { [k: string]: T }) {
   return Object.keys(obj).map(key => [key, obj[key]]);
 }
+
+export function contains<T>(iterable: Iterable<T>, element: T): boolean {
+  for (let item of iterable) {
+    if (element === item) {
+      return true;
+    }
+  }
+  return false;
+}

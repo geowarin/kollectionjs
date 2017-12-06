@@ -1,4 +1,4 @@
-import {getIterator, isIterable} from "./utils";
+import {contains, getIterator, isIterable} from "./utils";
 
 const TruePredicate = () => true;
 
@@ -349,6 +349,47 @@ export class Sequence<T> implements IterableIterator<T> {
       }
     }
     return max;
+  }
+
+  maxWith(compare: (a: T, b: T) => number): T | null {
+    let max: T | null = null;
+    for (let item of this) {
+      if (max == null || compare(item, max) > 0) {
+        max = item;
+      }
+    }
+    return max;
+  }
+
+  min(): T | null {
+    let result: T | null = null;
+    for (let item of this) {
+      if (result == null || item < result) {
+        result = item;
+      }
+    }
+    return result;
+  }
+
+  minBy<R>(selector: (value: T) => R): T | null {
+    let min: T | null = null;
+    let minSelected: R | null = null;
+    for (let item of this) {
+      const value = selector(item);
+      if (minSelected == null || value < minSelected) {
+        minSelected = value;
+        min = item;
+      }
+    }
+    return min;
+  }
+
+  minus(data: T | Iterable<T>): Sequence<T> {
+    if (isIterable(data)) {
+      return this.filter(it => !contains(data, it));
+    } else {
+      return this.filter(it => it !== data);
+    }
   }
 
   associate<K, V>(transform: (value: T) => [K, V]): Map<K, V> {
