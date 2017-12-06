@@ -1,4 +1,8 @@
-export function getIterator<T>(iterable: IterableIterator<T> | Array<T>): IterableIterator<T> {
+export function getIterableIterator<T>(iterable: IterableIterator<T> | Array<T>): IterableIterator<T> {
+  return iterable [Symbol.iterator]()
+}
+
+export function getIterator<T>(iterable: Iterable<T>): Iterator<T> {
   return iterable [Symbol.iterator]()
 }
 

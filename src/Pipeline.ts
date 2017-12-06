@@ -1,4 +1,4 @@
-import {getIterator} from "./utils";
+import {getIterableIterator} from "./utils";
 
 export type OperationWork = (previousOperation: Operation) => IterableIterator<any>
 
@@ -17,7 +17,7 @@ export class Pipeline<T> implements Iterable<T> {
   private lastOperation: Operation;
 
   constructor(private iterable: IterableIterator<T>) {
-    this.lastOperation = new Operation(() => getIterator(iterable));
+    this.lastOperation = new Operation(() => getIterableIterator(iterable));
   }
 
   [Symbol.iterator](): Iterator<T> {

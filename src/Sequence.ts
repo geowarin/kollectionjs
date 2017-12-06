@@ -1,15 +1,15 @@
-import {getIterator} from "./utils";
+import {getIterableIterator} from "./utils";
 import {Pipeline, Operation} from "./Pipeline";
 
 export class Sequence<T> implements Iterable<T> {
   private pipeline: any;
 
   constructor(args: T[]) {
-    this.pipeline = new Pipeline(getIterator(args));
+    this.pipeline = new Pipeline(getIterableIterator(args));
   }
 
   [Symbol.iterator](): Iterator<T> {
-    return getIterator(this.pipeline);
+    return getIterableIterator(this.pipeline);
   }
 
   filter(predicate: (item: T) => boolean): Sequence<T> {

@@ -3,6 +3,7 @@
     "module": "commonjs",
     "target": "es5",
     "lib": ["es2015"],
+    "rootDir": "src",
     "outDir": "lib",
     "downlevelIteration": true,
     "declaration": true,
@@ -14,13 +15,5 @@
     "noImplicitUseStrict": true,
     "noImplicitThis": true,
     "noImplicitAny": true
-  },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-    "test",
-    "lib"
-  ]
+  }
 }
