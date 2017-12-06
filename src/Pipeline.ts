@@ -8,25 +8,25 @@ export class Operation {
   constructor(private operationWork: OperationWork) {
   }
 
-  iterator() {
+  iterator(): IterableIterator<any> {
     return this.operationWork(this.previousOperation);
   }
 }
 
 export class Pipeline<T> implements Iterable<T> {
-  private lastOperation: Operation;
+  private operations: Operation[] = [];
 
   constructor(private iterable: IterableIterator<T>) {
-    this.lastOperation = new Operation(() => getIterableIterator(iterable));
+    this.addOperation(() => getIterableIterator(iterable));
   }
 
   [Symbol.iterator](): Iterator<T> {
-    return this.lastOperation.iterator();
+    return this.operations[0].iterator();
   }
 
   addOperation(work: OperationWork) {
     const newOperation = new Operation(work);
-    newOperation.previousOperation = this.lastOperation;
-    this.lastOperation = newOperation;
+    newOperation.previousOperation = this.operations[0];
+    this.operations.unshift(newOperation);
   }
 }

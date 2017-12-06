@@ -24,6 +24,18 @@ export class Sequence<T> implements Iterable<T> {
     return this;
   }
 
+  map<U, S>(transform: (element: T) => S): Sequence<U> {
+    this.pipeline.addOperation(
+      function* (prev: Operation) {
+        let index = 0;
+        for (let val of prev.iterator()) {
+          yield transform(val, index++);
+        }
+      }
+    );
+    return this as any;
+  }
+
   toArray(): T[] {
     return [...this];
   }

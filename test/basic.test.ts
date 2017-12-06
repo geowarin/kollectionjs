@@ -10,4 +10,14 @@ describe("sequence", () => {
     expect(iterator.next().value).toEqual(3);
     expect(iterator.next().value).toEqual(undefined);
   });
+
+  it("can chain operations", () => {
+    const sequence = sequenceOf(1, 2, 3);
+    let result = sequence
+      .map(it => it * 2)
+      .filter(it => it % 3 == 0)
+      .toArray();
+
+    expect(result).toEqual([6]);
+  });
 });
