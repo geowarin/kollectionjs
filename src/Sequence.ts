@@ -69,6 +69,13 @@ export class Sequence<T> implements IterableIterator<T> {
     }
   }
 
+  forEachIndexed<T>(this: Sequence<T>, action: (index: number, value: T) => void) {
+    let index = 0;
+    for (let item of this) {
+      action(index++, item);
+    }
+  }
+
   filter(predicate: (item: T) => boolean): Sequence<T> {
     return this.rewrap(function* (this: Iterable<T>) {
       for (let item of this) {
@@ -123,6 +130,24 @@ export class Sequence<T> implements IterableIterator<T> {
     });
   }
 
+  mapIndexed<R>(transform: (index: number, value: T) => R): Sequence<R> {
+    return this.rewrap(function* (this: Iterable<T>) {
+      let index = 0;
+      for (let item of this) {
+        yield transform(index++, item);
+      }
+    });
+  }
+
+  mapNotNull<R>(transform: (value: T) => R | null): Sequence<R> {
+    return this.flatMap((value: T) => {
+      const item = transform(value);
+      return item !== null
+        ? sequenceOf(item)
+        : emptySequence();
+    });
+  }
+
   flatten() {
     return this.rewrap(function* (this: Iterable<T>) {
       for (let item of this) {
@@ -141,6 +166,24 @@ export class Sequence<T> implements IterableIterator<T> {
         yield* transform(item);
       }
     });
+  }
+
+  fold<R>(initial: R, operation: (acc: R, element: T) => R): R {
+    let result = initial;
+    for (let item of this) {
+      result = operation(result, item);
+    }
+    return result;
+  }
+
+  foldIndexed<R>(initial: R, operation: (index: number, acc: R, element: T) => R): R {
+    let result = initial;
+    let index = 0;
+    for (let item of this) {
+      result = operation(index, result, item);
+      index++;
+    }
+    return result;
   }
 
   count(predicate: (item: T) => boolean = Boolean): number {
@@ -172,6 +215,55 @@ export class Sequence<T> implements IterableIterator<T> {
       i++;
     }
     return defaultValue(index);
+  }
+
+  indexOf(element: T): number {
+    let index = 0;
+    for (let item of this) {
+      if (item === element) {
+        return index;
+      }
+      index++;
+    }
+    return -1;
+  }
+
+  indexOfFirst(predicate: (value: T) => boolean): number {
+    let index = 0;
+    for (let item of this) {
+      if (predicate(item)) {
+        return index;
+      }
+      index++;
+    }
+    return -1;
+  }
+
+  indexOfLast<T>(this: Sequence<T>, predicate: (value: T) => boolean): number {
+    let index = 0;
+    let result = -1;
+    for (let item of this) {
+      if (predicate(item)) {
+        result = index;
+      }
+      index++;
+    }
+    return result;
+  }
+
+  last(predicate: (value: T) => boolean = TruePredicate): T {
+    let last = null;
+    let count = 0;
+    for (let item of this) {
+      count++;
+      if (predicate(item)) {
+        last = item;
+      }
+    }
+    if (count == 0) {
+      throw new Error("No such element");
+    }
+    return last as T;
   }
 
   take(num: number = 1): Sequence<T> {
@@ -231,6 +323,16 @@ export class Sequence<T> implements IterableIterator<T> {
         result.set(key, [item]);
       } else {
         array.push(item);
+      }
+    }
+    return result;
+  }
+
+  max<T>(this: Sequence<T>): T | null {
+    let result: T | null = null;
+    for (let item of this) {
+      if (result == null || item > result) {
+        result = item;
       }
     }
     return result;
