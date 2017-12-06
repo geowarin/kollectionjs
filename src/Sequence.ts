@@ -72,6 +72,20 @@ export class Sequence<T> implements IterableIterator<T> {
     );
   }
 
+  groupBy<K>(keySelector: (value: T) => K): Map<K, T[]> {
+    const result = new Map<K, T[]>();
+    for (let item of this) {
+      const key = keySelector(item);
+      const array = result.get(key);
+      if (array == null) {
+        result.set(key, [item]);
+      } else {
+        array.push(item);
+      }
+    }
+    return result;
+  }
+
   toArray(): T[] {
     return [...this];
   }
