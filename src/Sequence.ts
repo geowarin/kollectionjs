@@ -140,6 +140,40 @@ export class Sequence<T> implements IterableIterator<T> {
     throw new Error("No such element");
   }
 
+  single(predicate: (value: T) => boolean = TruePredicate): T {
+    let result = null;
+    let count = 0;
+    for (let item of this) {
+      if (predicate(item)) {
+        result = item;
+        count++;
+        if (count > 1) {
+          throw new Error("Expect single element");
+        }
+      }
+    }
+    if (count == 0) {
+      throw new Error("No such element");
+    }
+    return result as T;
+  }
+
+  singleOrNull(predicate: (value: T) => boolean = TruePredicate): T | null {
+    let result = null;
+    let count = 0;
+    for (let item of this) {
+      if (predicate(item)) {
+        result = item;
+        count++;
+      }
+    }
+    if (count > 1) {
+      return null;
+    }
+    return result;
+  }
+
+
   map<U, S>(transform: (element: T) => S): Sequence<S> {
     return this.rewrap(function* (this: Iterable<T>) {
       for (let item of this) {
@@ -307,6 +341,17 @@ export class Sequence<T> implements IterableIterator<T> {
       let count = 0;
       for (let item of this) {
         if (count++ >= num) {
+          break;
+        }
+        yield item;
+      }
+    });
+  }
+
+  takeWhile(predicate: (item: T) => boolean): Sequence<T> {
+    return this.rewrap(function* (this: Iterable<T>) {
+      for (let item of this) {
+        if (!predicate(item)) {
           break;
         }
         yield item;
@@ -525,12 +570,36 @@ export class Sequence<T> implements IterableIterator<T> {
       : sum / count;
   }
 
+  sum(this: Sequence<number>): number {
+    let result = 0;
+    for (let item of this) {
+      result += item;
+    }
+    return result;
+  }
+
+  sumBy(selector: (value: T) => number): number {
+    let result = 0;
+    for (let item of this) {
+      result += selector(item);
+    }
+    return result;
+  }
+
   reverse(): Sequence<T> {
     return asSequence(this.toArray().reverse());
   }
 
   toArray(): T[] {
     return [...this];
+  }
+
+  toSet<T>(this: Sequence<T>, set?: Set<T>): Set<T> {
+    const result = set || new Set();
+    for (let item of this) {
+      result.add(item);
+    }
+    return result;
   }
 
   private rewrap<U>(fn: () => IterableIterator<U>): Sequence<U> {
