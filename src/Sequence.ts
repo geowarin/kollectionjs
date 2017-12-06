@@ -15,6 +15,49 @@ export class Sequence<T> implements IterableIterator<T> {
     return this;
   }
 
+  all(this: Sequence<T>, predicate: (item: T) => boolean): boolean {
+    for (let item of this) {
+      if (!predicate(item)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  any(this: Sequence<T>, predicate: (item: T) => boolean = Boolean): boolean {
+    for (let item of this) {
+      if (predicate(item)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  lastOrNull(this: Sequence<T>, predicate: (value: T) => boolean = Boolean): T | null {
+    let last = null;
+    for (let item of this) {
+      if (predicate(item)) {
+        last = item;
+      }
+    }
+    return last;
+  }
+
+  firstOrNull<T>(this: Sequence<T>, predicate: (item: T) => boolean = Boolean): T | null {
+    for (let item of this) {
+      if (predicate(item)) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  forEach<T>(this: Sequence<T>, action: (item: T) => void) {
+    for (let item of this) {
+      action(item);
+    }
+  }
+
   filter(predicate: (item: T) => boolean): Sequence<T> {
     return this.rewrap(function* (this: Iterable<T>) {
       for (let item of this) {
