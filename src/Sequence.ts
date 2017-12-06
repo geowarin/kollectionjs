@@ -52,6 +52,15 @@ export class Sequence<T> implements IterableIterator<T> {
     return null;
   }
 
+  contains<T>(this: Sequence<T>, element: T): boolean {
+    for (let item of this) {
+      if (element === item) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   forEach<T>(this: Sequence<T>, action: (item: T) => void) {
     for (let item of this) {
       action(item);
@@ -90,10 +99,39 @@ export class Sequence<T> implements IterableIterator<T> {
 
   flatMap<U>(transform: (value: T) => Iterable<U>): Sequence<U> {
     return this.rewrap(function* (this: Iterable<T>) {
-      for (let x of this) {
-        yield* transform(x);
+      for (let item of this) {
+        yield* transform(item);
       }
     });
+  }
+
+  count(predicate: (item: T) => boolean = Boolean): number {
+    let num = 0;
+    for (let item of this) {
+      if (predicate(item)) {
+        num++;
+      }
+    }
+    return num;
+  }
+
+  elementAt(index: number): T {
+    return this.elementAtOrElse(index, () => { throw new Error("Index out of bounds: " + index) })
+  }
+
+  elementAtOrNull(index: number): T | null {
+    return this.elementAtOrElse(index, () => null as any);
+  }
+
+  elementAtOrElse(index: number, defaultValue: (index: number) => T): T {
+    let i = 0;
+    for (let item of this) {
+      if (i === index) {
+        return item;
+      }
+      i++;
+    }
+    return defaultValue(index);
   }
 
   take(num: number = 1): Sequence<T> {
@@ -199,6 +237,36 @@ export class Sequence<T> implements IterableIterator<T> {
       result.set(key, value);
     }
     return result;
+  }
+
+  chunk(chunkSize: number): T[][] {
+    if (chunkSize < 1) {
+      throw new Error("chunkSize must be > 0 but is " + chunkSize);
+    }
+    const result: T[][] = [];
+    let index = 0;
+    for (let item of this) {
+      const chunkIndex = Math.floor(index / chunkSize);
+      if (result[chunkIndex] == null) {
+        result[chunkIndex] = [item];
+      } else {
+        result[chunkIndex].push(item);
+      }
+      index++;
+    }
+    return result;
+  }
+
+  average(this: Sequence<number>): number {
+    let sum = 0;
+    let count = 0;
+    for (let item of this) {
+      sum += item;
+      count++;
+    }
+    return count === 0
+      ? Number.NaN
+      : sum / count;
   }
 
   toArray(): T[] {
