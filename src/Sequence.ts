@@ -545,9 +545,9 @@ export class Sequence<T> implements IterableIterator<T> {
     return result;
   }
 
-  partition(predicate: (value: T) => boolean): { "true": Array<T>, "false": Array<T> } {
-    const arrayTrue: Array<T> = [];
-    const arrayFalse: Array<T> = [];
+  partition(predicate: (value: T) => boolean): { "true": T[], "false": T[] } {
+    const arrayTrue: T[] = [];
+    const arrayFalse: T[] = [];
     for (let item of this) {
       if (predicate(item)) {
         arrayTrue.push(item);
@@ -584,6 +584,21 @@ export class Sequence<T> implements IterableIterator<T> {
       result += selector(item);
     }
     return result;
+  }
+
+  zip<S>(other: Iterable<S>): Sequence<[T, S]> {
+    const otherIterator: Iterator<S> = getIterator(other);
+    const thisIterator: Iterator<T> = this;
+    return this.rewrap(function* (this: Iterable<T>) {
+      while (true) {
+        let otherNext = otherIterator.next();
+        let thisNext = thisIterator.next();
+        if (otherNext.done || thisNext.done) {
+          return;
+        }
+        yield ([thisNext.value, otherNext.value] as [T, S]);
+      }
+    });
   }
 
   reverse(): Sequence<T> {
