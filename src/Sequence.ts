@@ -1,46 +1,48 @@
-import {getIterableIterator} from "./utils";
-import {Pipeline, Operation} from "./Pipeline";
+import {getIterator} from "./utils";
 
-export class Sequence<T> implements Iterable<T> {
-  private pipeline: any;
+export class Sequence<T> implements IterableIterator<T> {
+  _next: () => IteratorResult<T>;
 
-  constructor(args: T[]) {
-    this.pipeline = new Pipeline(getIterableIterator(args));
+  public next(): IteratorResult<T> {
+    return this._next()
   }
 
-  [Symbol.iterator](): Iterator<T> {
-    return getIterableIterator(this.pipeline);
+  constructor(private iterator: Iterator<T>) {
+    this._next = iterator.next.bind(iterator);
   }
 
-  filter(predicate: (item: T) => boolean): Sequence<T> {
-    this.pipeline.addOperation(
-      function* (prev: Operation) {
-        for (let val of prev.iterator()) {
-          if (predicate(val))
-            yield val;
-        }
-      }
-    );
+  [Symbol.iterator](): IterableIterator<T> {
     return this;
   }
 
-  map<U, S>(transform: (element: T) => S): Sequence<U> {
-    this.pipeline.addOperation(
-      function* (prev: Operation) {
-        let index = 0;
-        for (let val of prev.iterator()) {
-          yield transform(val, index++);
+  filter(predicate: (item: T) => boolean): Sequence<T> {
+    return this.rewrap(function* (this: Iterable<T>) {
+      for (let val of this) {
+        if (predicate(val))
+          yield val;
+      }
+    });
+  }
+
+  map<U, S>(transform: (element: T) => S): Sequence<S> {
+    return this.rewrap(
+      function* (this: Iterable<T>) {
+        for (let val of this) {
+          yield transform(val);
         }
       }
     );
-    return this as any;
   }
 
   toArray(): T[] {
     return [...this];
   }
+
+  private rewrap<U>(fn: () => IterableIterator<U>): Sequence<U> {
+    return new Sequence(fn.call(this));
+  };
 }
 
 export function sequenceOf<T>(...args: T[]): Sequence<T> {
-  return new Sequence(args);
+  return new Sequence(getIterator(args));
 }
