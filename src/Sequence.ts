@@ -1,4 +1,4 @@
-import {getIterator} from "./utils";
+import {getIterator, isIterable} from "./utils";
 
 export class Sequence<T> implements IterableIterator<T> {
   _next: () => IteratorResult<T>;
@@ -32,6 +32,18 @@ export class Sequence<T> implements IterableIterator<T> {
         }
       }
     );
+  }
+
+  flatten() {
+    return this.rewrap(function* (this: Iterable<T>) {
+      for (let x of this) {
+        if (typeof x !== "string" && isIterable(x)) {
+          yield* x;
+        } else {
+          yield x;
+        }
+      }
+    })
   }
 
   toArray(): T[] {
