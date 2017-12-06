@@ -86,6 +86,19 @@ export class Sequence<T> implements IterableIterator<T> {
     return result;
   }
 
+  maxBy<R>(selector: (value: T) => R): T | null {
+    let max: T | null = null;
+    let maxSelected: R | null = null;
+    for (let item of this) {
+      const value = selector(item);
+      if (maxSelected == null || value > maxSelected) {
+        maxSelected = value;
+        max = item;
+      }
+    }
+    return max;
+  }
+
   toArray(): T[] {
     return [...this];
   }
@@ -97,4 +110,8 @@ export class Sequence<T> implements IterableIterator<T> {
 
 export function sequenceOf<T>(...args: T[]): Sequence<T> {
   return new Sequence(getIterator(args));
+}
+
+export function emptySequence<T>(): Sequence<T> {
+  return sequenceOf();
 }
