@@ -17,7 +17,7 @@ export class Sequence<T> implements IterableIterator<T> {
     return this;
   }
 
-  all(this: Sequence<T>, predicate: (item: T) => boolean): boolean {
+  all(predicate: (item: T) => boolean): boolean {
     for (let item of this) {
       if (!predicate(item)) {
         return false;
@@ -26,7 +26,7 @@ export class Sequence<T> implements IterableIterator<T> {
     return true;
   }
 
-  any(this: Sequence<T>, predicate: (item: T) => boolean = TruePredicate): boolean {
+  any(predicate: (item: T) => boolean = TruePredicate): boolean {
     for (let item of this) {
       if (predicate(item)) {
         return true;
@@ -35,7 +35,7 @@ export class Sequence<T> implements IterableIterator<T> {
     return false;
   }
 
-  lastOrNull(this: Sequence<T>, predicate: (value: T) => boolean = TruePredicate): T | null {
+  lastOrNull(predicate: (value: T) => boolean = TruePredicate): T | null {
     let last = null;
     for (let item of this) {
       if (predicate(item)) {
@@ -45,7 +45,7 @@ export class Sequence<T> implements IterableIterator<T> {
     return last;
   }
 
-  firstOrNull(this: Sequence<T>, predicate: (item: T) => boolean = TruePredicate): T | null {
+  firstOrNull(predicate: (item: T) => boolean = TruePredicate): T | null {
     for (let item of this) {
       if (predicate(item)) {
         return item;
@@ -54,7 +54,7 @@ export class Sequence<T> implements IterableIterator<T> {
     return null;
   }
 
-  contains<T>(this: Sequence<T>, element: T): boolean {
+  contains(element: T): boolean {
     for (let item of this) {
       if (element === item) {
         return true;
@@ -63,13 +63,13 @@ export class Sequence<T> implements IterableIterator<T> {
     return false;
   }
 
-  forEach<T>(this: Sequence<T>, action: (item: T) => void) {
+  forEach(action: (item: T) => void) {
     for (let item of this) {
       action(item);
     }
   }
 
-  forEachIndexed<T>(this: Sequence<T>, action: (index: number, value: T) => void) {
+  forEachIndexed(action: (index: number, value: T) => void) {
     let index = 0;
     for (let item of this) {
       action(index++, item);
@@ -109,7 +109,7 @@ export class Sequence<T> implements IterableIterator<T> {
     return this.firstOrNull(predicate);
   }
 
-  findLast<T>(this: Sequence<T>, predicate: (value: T) => boolean = TruePredicate): T | null {
+  findLast(predicate: (value: T) => boolean = TruePredicate): T | null {
     return this.lastOrNull(predicate);
   }
 
@@ -239,7 +239,7 @@ export class Sequence<T> implements IterableIterator<T> {
     return -1;
   }
 
-  indexOfLast<T>(this: Sequence<T>, predicate: (value: T) => boolean): number {
+  indexOfLast(predicate: (value: T) => boolean): number {
     let index = 0;
     let result = -1;
     for (let item of this) {
