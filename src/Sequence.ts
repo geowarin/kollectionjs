@@ -35,6 +35,15 @@ export class Sequence<T> implements IterableIterator<T> {
     return false;
   }
 
+  none<T>(this: Sequence<T>, predicate: (value: T) => boolean = TruePredicate): boolean {
+    for (let item of this) {
+      if (predicate(item)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   lastOrNull(predicate: (value: T) => boolean = TruePredicate): T | null {
     let last = null;
     for (let item of this) {
@@ -67,6 +76,15 @@ export class Sequence<T> implements IterableIterator<T> {
     for (let item of this) {
       action(item);
     }
+  }
+
+  onEach(action: (item: T) => void): Sequence<T> {
+    return this.rewrap(function* (this: Iterable<T>) {
+      for (let item of this) {
+        action(item);
+        yield item;
+      }
+    })
   }
 
   forEachIndexed(action: (index: number, value: T) => void) {
@@ -176,12 +194,30 @@ export class Sequence<T> implements IterableIterator<T> {
     return result;
   }
 
+
   foldIndexed<R>(initial: R, operation: (index: number, acc: R, element: T) => R): R {
     let result = initial;
     let index = 0;
     for (let item of this) {
       result = operation(index, result, item);
       index++;
+    }
+    return result;
+  }
+
+  reduce(operation: (acc: T, value: T) => T): T {
+    let result: T = this.first();
+    for (let item of this) {
+      result = operation(result, item);
+    }
+    return result;
+  }
+
+  reduceIndexed(operation: (index: number, acc: T, element: T) => T): T {
+    let result: T = this.first();
+    let index = 1;
+    for (let item of this) {
+      result = operation(index++, result, item);
     }
     return result;
   }
@@ -384,12 +420,36 @@ export class Sequence<T> implements IterableIterator<T> {
     return min;
   }
 
+  minWith(compare: (a: T, b: T) => number): T | null {
+    let min: T | null = null;
+    for (let item of this) {
+      if (min == null || compare(item, min) < 0) {
+        min = item;
+      }
+    }
+    return min;
+  }
+
   minus(data: T | Iterable<T>): Sequence<T> {
     if (isIterable(data)) {
       return this.filter(it => !contains(data, it));
     } else {
       return this.filter(it => it !== data);
     }
+  }
+
+  plus(element: T): Sequence<T>;
+  plus(other: Iterable<T>): Sequence<T>;
+  plus(data: T | Iterable<T>): Sequence<T> {
+    const other = isIterable(data) ? data : [data];
+    return this.rewrap(function* (this: Iterable<T>) {
+      for (let item of this) {
+        yield item;
+      }
+      for (let item of other) {
+        yield item;
+      }
+    });
   }
 
   associate<K, V>(transform: (value: T) => [K, V]): Map<K, V> {
@@ -440,6 +500,19 @@ export class Sequence<T> implements IterableIterator<T> {
     return result;
   }
 
+  partition(predicate: (value: T) => boolean): { "true": Array<T>, "false": Array<T> } {
+    const arrayTrue: Array<T> = [];
+    const arrayFalse: Array<T> = [];
+    for (let item of this) {
+      if (predicate(item)) {
+        arrayTrue.push(item);
+      } else {
+        arrayFalse.push(item);
+      }
+    }
+    return {"true": arrayTrue, "false": arrayFalse};
+  }
+
   average(this: Sequence<number>): number {
     let sum = 0;
     let count = 0;
@@ -450,6 +523,10 @@ export class Sequence<T> implements IterableIterator<T> {
     return count === 0
       ? Number.NaN
       : sum / count;
+  }
+
+  reverse(): Sequence<T> {
+    return asSequence(this.toArray().reverse());
   }
 
   toArray(): T[] {
