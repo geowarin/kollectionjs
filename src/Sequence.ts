@@ -43,7 +43,7 @@ export class Sequence<T> implements IterableIterator<T> {
     return last;
   }
 
-  firstOrNull<T>(this: Sequence<T>, predicate: (item: T) => boolean = Boolean): T | null {
+  firstOrNull(this: Sequence<T>, predicate: (item: T) => boolean = Boolean): T | null {
     for (let item of this) {
       if (predicate(item)) {
         return item;
@@ -88,6 +88,14 @@ export class Sequence<T> implements IterableIterator<T> {
     });
   }
 
+  flatMap<U>(transform: (value: T) => Iterable<U>): Sequence<U> {
+    return this.rewrap(function* (this: Iterable<T>) {
+      for (let x of this) {
+        yield* transform(x);
+      }
+    });
+  }
+
   take(num: number = 1): Sequence<T> {
     return this.rewrap(function* (this: Iterable<T>) {
       let count = 0;
@@ -105,6 +113,31 @@ export class Sequence<T> implements IterableIterator<T> {
       let count = 0;
       for (let item of this) {
         if (count++ >= num) {
+          yield item;
+        }
+      }
+    });
+  }
+
+  distinct(): Sequence<T> {
+    return this.rewrap(function* (this: Iterable<T>) {
+      const items: T[] = [];
+      for (let item of this) {
+        if (items.indexOf(item) < 0) {
+          items.push(item);
+          yield item;
+        }
+      }
+    });
+  }
+
+  distinctBy<K>(selector: (item: T) => K): Sequence<T> {
+    return this.rewrap(function* (this: Iterable<T>) {
+      const keys: K[] = [];
+      for (let item of this) {
+        const key = selector(item);
+        if (keys.indexOf(key) < 0) {
+          keys.push(key);
           yield item;
         }
       }
@@ -136,6 +169,15 @@ export class Sequence<T> implements IterableIterator<T> {
       }
     }
     return max;
+  }
+
+  associate<K, V>(transform: (value: T) => [K, V]): Map<K, V> {
+    const result = new Map<K, V>();
+    for (let item of this) {
+      const pair = transform(item);
+      result.set(pair[0], pair[1]);
+    }
+    return result;
   }
 
   associateBy<K>(keySelector: (value: T) => K): Map<K, T>;
@@ -174,4 +216,8 @@ export function sequenceOf<T>(...args: T[]): Sequence<T> {
 
 export function emptySequence<T>(): Sequence<T> {
   return sequenceOf();
+}
+
+export function asSequence<T>(iterable: Iterable<T>): Sequence<T> {
+  return new Sequence(getIterator(iterable));
 }
