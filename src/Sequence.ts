@@ -1,10 +1,12 @@
 import {getIterator, isIterable} from "./utils";
 
+const TruePredicate = () => true;
+
 export class Sequence<T> implements IterableIterator<T> {
   private readonly _next: () => IteratorResult<T>;
 
   public next(): IteratorResult<T> {
-    return this._next()
+    return this._next();
   }
 
   constructor(iterator: Iterator<T>) {
@@ -24,7 +26,7 @@ export class Sequence<T> implements IterableIterator<T> {
     return true;
   }
 
-  any(this: Sequence<T>, predicate: (item: T) => boolean = Boolean): boolean {
+  any(this: Sequence<T>, predicate: (item: T) => boolean = TruePredicate): boolean {
     for (let item of this) {
       if (predicate(item)) {
         return true;
@@ -33,7 +35,7 @@ export class Sequence<T> implements IterableIterator<T> {
     return false;
   }
 
-  lastOrNull(this: Sequence<T>, predicate: (value: T) => boolean = Boolean): T | null {
+  lastOrNull(this: Sequence<T>, predicate: (value: T) => boolean = TruePredicate): T | null {
     let last = null;
     for (let item of this) {
       if (predicate(item)) {
@@ -43,7 +45,7 @@ export class Sequence<T> implements IterableIterator<T> {
     return last;
   }
 
-  firstOrNull(this: Sequence<T>, predicate: (item: T) => boolean = Boolean): T | null {
+  firstOrNull(this: Sequence<T>, predicate: (item: T) => boolean = TruePredicate): T | null {
     for (let item of this) {
       if (predicate(item)) {
         return item;
@@ -75,6 +77,42 @@ export class Sequence<T> implements IterableIterator<T> {
         }
       }
     });
+  }
+
+  filterIndexed(predicate: (index: number, item: T) => boolean): Sequence<T> {
+    return this.rewrap(function* (this: Iterable<T>) {
+      let index = 0;
+      for (let item of this) {
+        if (predicate(index++, item)) {
+          yield item;
+        }
+      }
+    });
+  }
+
+  filterNot(predicate: (value: T) => boolean): Sequence<T> {
+    return this.filter((value: T) => !predicate(value));
+  }
+
+  filterNotNull(): Sequence<T> {
+    return this.filter(it => it !== null);
+  }
+
+  find(predicate: (item: T) => boolean = TruePredicate): T | null {
+    return this.firstOrNull(predicate);
+  }
+
+  findLast<T>(this: Sequence<T>, predicate: (value: T) => boolean = TruePredicate): T | null {
+    return this.lastOrNull(predicate);
+  }
+
+  first(predicate: (item: T) => boolean = TruePredicate): T {
+    for (let item of this) {
+      if (predicate(item)) {
+        return item;
+      }
+    }
+    throw new Error("No such element");
   }
 
   map<U, S>(transform: (element: T) => S): Sequence<S> {
@@ -116,7 +154,9 @@ export class Sequence<T> implements IterableIterator<T> {
   }
 
   elementAt(index: number): T {
-    return this.elementAtOrElse(index, () => { throw new Error("Index out of bounds: " + index) })
+    return this.elementAtOrElse(index, () => {
+      throw new Error("Index out of bounds: " + index)
+    })
   }
 
   elementAtOrNull(index: number): T | null {
