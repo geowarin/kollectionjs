@@ -2,11 +2,13 @@
   "name": "kollectionjs",
   "version": "1.0.0",
   "description": "Collection utilities inspired by kotlin for javascript",
-  "main": "index.js",
   "repository": "https://geowarin/kollectionjs",
   "author": "Geoffroy Warin",
   "license": "MIT",
   "private": false,
+  "browser": "dist/kollection.umd.es6.js",
+  "main": "dist/kollection.cjs.js",
+  "module": "dist/kollection.esm.js",
   "scripts": {
     "test": "jest",
     "build": "rollup -c"
