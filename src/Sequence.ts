@@ -601,6 +601,16 @@ export class Sequence<T> implements IterableIterator<T> {
     });
   }
 
+  unzip<T, S>(this: Sequence<[T, S]>): [T[], S[]] {
+    const array1: T[] = [];
+    const array2: S[] = [];
+    for (let [first, second] of this) {
+      array1.push(first);
+      array2.push(second);
+    }
+    return [array1, array2];
+  }
+
   reverse(): Sequence<T> {
     return asSequence(this.toArray().reverse());
   }
