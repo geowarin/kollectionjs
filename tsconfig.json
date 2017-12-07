@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es5",
-    "lib": ["es2015"],
+    "target": "esnext",
+    "lib": [
+      "es2015"
+    ],
     "rootDir": "src",
     "outDir": "lib",
-    "downlevelIteration": true,
     "declaration": true,
     "sourceMap": true,
     "skipLibCheck": true,
@@ -15,5 +15,6 @@
     "noImplicitUseStrict": true,
     "noImplicitThis": true,
     "noImplicitAny": true
-  }
+  },
+  "exclude": ["test"]
 }

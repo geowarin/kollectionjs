@@ -8,7 +8,8 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "rollup -c"
   },
   "dependencies": {
     "typescript": "^2.6.2"
@@ -16,6 +17,8 @@
   "devDependencies": {
     "@types/jest": "^21.1.8",
     "jest": "^21.2.1",
+    "rollup": "^0.52.1",
+    "rollup-plugin-typescript2": "^0.8.4",
     "ts-jest": "^21.2.4"
   },
   "jest": {
@@ -35,5 +38,4 @@
       "src/main"
     ]
   }
-
 }
