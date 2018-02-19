@@ -6,22 +6,20 @@
   "author": "Geoffroy Warin",
   "license": "MIT",
   "private": false,
-  "browser": "dist/kollection.umd.es6.js",
-  "main": "dist/kollection.cjs.js",
+  "browser": "dist/kollection.umd.js",
+  "main": "dist/kollection.js",
   "module": "dist/kollection.esm.js",
+  "typings": "dist/index",
   "scripts": {
     "test": "jest",
-    "build": "rollup -c"
-  },
-  "dependencies": {
-    "typescript": "^2.6.2"
+    "build": "microbundle"
   },
   "devDependencies": {
     "@types/jest": "^21.1.8",
     "jest": "^21.2.1",
-    "rollup": "^0.52.1",
-    "rollup-plugin-typescript2": "^0.8.4",
-    "ts-jest": "^21.2.4"
+    "microbundle": "^0.4.4",
+    "ts-jest": "^21.2.4",
+    "typescript": "^2.8.0-dev.20180217"
   },
   "jest": {
     "moduleFileExtensions": [

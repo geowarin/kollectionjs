@@ -5,16 +5,11 @@
       "es2015"
     ],
     "rootDir": "src",
-    "outDir": "lib",
     "declaration": true,
     "sourceMap": true,
-    "skipLibCheck": true,
-    "removeComments": false,
-    "strictNullChecks": true,
-    "noImplicitReturns": true,
-    "noImplicitUseStrict": true,
-    "noImplicitThis": true,
-    "noImplicitAny": true
+    "strict": true
   },
-  "exclude": ["test"]
+  "exclude": [
+    "test"
+  ]
 }
