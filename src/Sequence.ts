@@ -48,7 +48,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   onEach(action: (item: T) => void): Sequence<T> {
-    return this.rewrap(function* (this: Iterable<T>) {
+    return this.pipe(function* (this: Iterable<T>) {
       for (let item of this) {
         action(item);
         yield item;
@@ -68,7 +68,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   filterIndexed(predicate: (index: number, item: T) => boolean): Sequence<T> {
-    return this.rewrap(function* (this: Iterable<T>) {
+    return this.pipe(function* (this: Iterable<T>) {
       let index = 0;
       for (let item of this) {
         if (predicate(index++, item)) {
@@ -142,7 +142,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   mapIndexed<R>(transform: (index: number, value: T) => R): Sequence<R> {
-    return this.rewrap(function* (this: Iterable<T>) {
+    return this.pipe(function* () {
       let index = 0;
       for (let item of this) {
         yield transform(index++, item);
@@ -155,7 +155,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   flatten() {
-    return this.rewrap(function* (this: Iterable<T>) {
+    return this.pipe(function* () {
       for (let item of this) {
         if (typeof item !== "string" && isIterable(item)) {
           yield* item;
@@ -278,7 +278,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   takeWhile(predicate: (item: T) => boolean): Sequence<T> {
-    return this.rewrap(function* (this: Iterable<T>) {
+    return this.pipe(function* () {
       for (let item of this) {
         if (!predicate(item)) {
           break;
@@ -293,7 +293,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   distinct(): Sequence<T> {
-    return this.rewrap(function* (this: Iterable<T>) {
+    return this.pipe(function* () {
       const seen = new Set<T>();
       for (let item of this) {
         if (!seen.has(item)) {
@@ -305,7 +305,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   distinctBy<K>(selector: (item: T) => K): Sequence<T> {
-    return this.rewrap(function* (this: Iterable<T>) {
+    return this.pipe(function* () {
       const seen = new Set<K>();
       for (let item of this) {
         const key = selector(item);
@@ -409,7 +409,7 @@ export class Sequence<T> extends Iterator<T> {
   plus(other: Iterable<T>): Sequence<T>;
   plus(data: T | Iterable<T>): Sequence<T> {
     const other = isIterable(data) ? data : [data];
-    return this.rewrap(function* (this: Iterable<T>) {
+    return this.pipe(function* () {
       for (let item of this) {
         yield item;
       }
@@ -507,7 +507,7 @@ export class Sequence<T> extends Iterator<T> {
   zip<S>(other: Iterable<S>): Sequence<[T, S]> {
     const otherIterator: Iterator<S> = getIterator(other);
     const thisIterator: Iterator<T> = this;
-    return this.rewrap(function* (this: Iterable<T>) {
+    return this.pipe(function* () {
       while (true) {
         let otherNext = otherIterator.next();
         let thisNext = thisIterator.next();
@@ -541,7 +541,7 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
-  private rewrap<U>(fn: () => IterableIterator<U>): Sequence<U> {
+  private pipe<U>(fn: (this: Iterable<T>) => IterableIterator<U>): Sequence<U> {
     return new Sequence(fn.call(this));
   }
 }
