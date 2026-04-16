@@ -30,4 +30,10 @@ describe("minus", () => {
     expect(array[1]).toBe(2);
     expect(array[2]).toBe(3);
   });
+
+  it("should remove sequence elements regardless of order", () => {
+    const array = sequenceOf(1, 2, 3).minus(sequenceOf(3, 1)).toArray();
+    expect(array.length).toBe(1);
+    expect(array[0]).toBe(2);
+  });
 });

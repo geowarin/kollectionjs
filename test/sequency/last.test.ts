@@ -26,4 +26,8 @@ describe("last", () => {
     const result = sequenceOf(1, 2, null).last();
     expect(result).toBeNull();
   });
+
+  it("should throw when predicate matches no elements", () => {
+    expect(() => sequenceOf(1, 2, 3).last((it) => it > 3)).toThrow("No such element");
+  });
 });

@@ -16,4 +16,14 @@ describe("mapNotNull", () => {
     expect(array[0]).toBe(1);
     expect(array[1]).toBe(4);
   });
+
+  it("should filter out undefined values", () => {
+    const array = sequenceOf(1, 2, 3, 4)
+      .mapNotNull((it) => (it % 2 === 0 ? it : undefined))
+      .toArray();
+
+    expect(array.length).toBe(2);
+    expect(array[0]).toBe(2);
+    expect(array[1]).toBe(4);
+  });
 });

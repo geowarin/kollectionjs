@@ -11,4 +11,14 @@ describe("filter", () => {
     expect(array[0]).toBe(2);
     expect(array[1]).toBe(3);
   });
+
+  it("should filter elements by index", () => {
+    const array = sequenceOf(1, 2, 3)
+      .filter((_it, index) => index < 2)
+      .toArray();
+
+    expect(array.length).toBe(2);
+    expect(array[0]).toBe(1);
+    expect(array[1]).toBe(2);
+  });
 });

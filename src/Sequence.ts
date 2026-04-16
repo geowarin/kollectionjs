@@ -1,4 +1,4 @@
-import { contains, getIterator, isIterable } from "./utils";
+import { getIterator, isIterable } from "./utils";
 
 const TruePredicate = () => true;
 
@@ -67,17 +67,6 @@ export class Sequence<T> extends Iterator<T> {
     return new Sequence(super.filter(predicate));
   }
 
-  filterIndexed(predicate: (index: number, item: T) => boolean): Sequence<T> {
-    return this.pipe(function* (this: Iterable<T>) {
-      let index = 0;
-      for (let item of this) {
-        if (predicate(index++, item)) {
-          yield item;
-        }
-      }
-    });
-  }
-
   filterNot(predicate: (value: T) => boolean): Sequence<T> {
     return this.filter((value: T) => !predicate(value));
   }
@@ -129,10 +118,8 @@ export class Sequence<T> extends Iterator<T> {
       if (predicate(item)) {
         result = item;
         count++;
+        if (count > 1) return undefined;
       }
-    }
-    if (count > 1) {
-      return undefined;
     }
     return result;
   }
@@ -141,21 +128,12 @@ export class Sequence<T> extends Iterator<T> {
     return new Sequence(super.map(transform));
   }
 
-  mapIndexed<R>(transform: (index: number, value: T) => R): Sequence<R> {
-    return this.pipe(function* () {
-      let index = 0;
-      for (let item of this) {
-        yield transform(index++, item);
-      }
-    });
-  }
-
-  mapNotNull<R>(transform: (value: T) => R | null): Sequence<R> {
-    return new Sequence(super.map(transform).filter((x): x is R => x !== null));
+  mapNotNull<R>(transform: (value: T) => R | null | undefined): Sequence<R> {
+    return new Sequence(super.map(transform).filter((x): x is R => x != null));
   }
 
   flatten() {
-    return this.pipe(function* () {
+    return this.pipe(function* (this: Iterable<T>) {
       for (let item of this) {
         if (typeof item !== "string" && isIterable(item)) {
           yield* item;
@@ -193,7 +171,7 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
-  count(predicate: (item: T) => boolean = Boolean): number {
+  count(predicate: (item: T) => boolean = TruePredicate): number {
     let num = 0;
     for (let item of this) {
       if (predicate(item)) {
@@ -210,7 +188,12 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   elementAtOrNull(index: number): T | undefined {
-    return this.elementAtOrElse(index, () => undefined as any);
+    let i = 0;
+    for (let item of this) {
+      if (i === index) return item;
+      i++;
+    }
+    return undefined;
   }
 
   elementAtOrElse(index: number, defaultValue: (index: number) => T): T {
@@ -260,14 +243,14 @@ export class Sequence<T> extends Iterator<T> {
 
   last(predicate: (value: T) => boolean = TruePredicate): T {
     let last: T | undefined = undefined;
-    let count = 0;
+    let found = false;
     for (let item of this) {
-      count++;
       if (predicate(item)) {
         last = item;
+        found = true;
       }
     }
-    if (count == 0) {
+    if (!found) {
       throw new Error("No such element");
     }
     return last as T;
@@ -399,7 +382,8 @@ export class Sequence<T> extends Iterator<T> {
 
   minus(data: T | Iterable<T>): Sequence<T> {
     if (isIterable(data)) {
-      return this.filter((it) => !contains(data, it));
+      const exclusions = new Set<T>(data);
+      return this.filter((it) => !exclusions.has(it));
     } else {
       return this.filter((it) => it !== data);
     }
@@ -452,15 +436,14 @@ export class Sequence<T> extends Iterator<T> {
       throw new Error("chunkSize must be > 0 but is " + chunkSize);
     }
     const result: T[][] = [];
-    let index = 0;
+    let posInChunk = 0;
     for (let item of this) {
-      const chunkIndex = Math.floor(index / chunkSize);
-      if (result[chunkIndex] == null) {
-        result[chunkIndex] = [item];
+      if (posInChunk === 0) {
+        result.push([item]);
       } else {
-        result[chunkIndex].push(item);
+        result[result.length - 1].push(item);
       }
-      index++;
+      if (++posInChunk === chunkSize) posInChunk = 0;
     }
     return result;
   }
