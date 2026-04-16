@@ -505,6 +505,24 @@ export class Sequence<T> extends Iterator<T> {
     return [array1, array2];
   }
 
+  sorted(): Sequence<T> {
+    return asSequence(this.toArray().sort());
+  }
+
+  sortedBy<R>(selector: (value: T) => R): Sequence<T> {
+    return asSequence(
+      this.toArray().sort((a, b) => {
+        const ka = selector(a);
+        const kb = selector(b);
+        return ka < kb ? -1 : ka > kb ? 1 : 0;
+      }),
+    );
+  }
+
+  sortedWith(comparator: (a: T, b: T) => number): Sequence<T> {
+    return asSequence(this.toArray().sort(comparator));
+  }
+
   reverse(): Sequence<T> {
     return asSequence(this.toArray().reverse());
   }
