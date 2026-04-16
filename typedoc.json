@@ -1,0 +1,9 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "name": "kollectionjs",
+  "readme": "README.md",
+  "includeVersion": true,
+  "hideGenerator": true,
+  "excludeInternal": true
+}

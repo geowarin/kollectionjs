@@ -20,6 +20,7 @@
     "test": "vitest --run",
     "typecheck": "tsc --noEmit",
     "release": "bumpp",
+    "docs": "typedoc",
     "prepublishOnly": "pnpm run build"
   },
   "devDependencies": {
@@ -28,6 +29,7 @@
     "bumpp": "^11.0.1",
     "oxfmt": "^0.45.0",
     "tsdown": "^0.21.7",
+    "typedoc": "^0.28.19",
     "vite": "^8.0.8",
     "vitest": "^4.1.4"
   }
