@@ -4,18 +4,24 @@ Lazy, chainable collection utilities for TypeScript, inspired by Kotlin's sequen
 
 `Sequence<T>` is a native subclass of `Iterator<T>`. Operations are lazy — nothing runs until a terminal call like `toArray()` or `forEach()`.
 
+## Installation
+
+```sh
+pnpm add kollectionjs
+```
+
 ## Creating sequences
 
 ```ts
 import { sequenceOf, asSequence, emptySequence, range, generate } from "kollectionjs";
 
-sequenceOf(1, 2, 3)             // from values
-asSequence([1, 2, 3])           // from any Iterable
-emptySequence<number>()         // empty
-range(1, 5)                     // [1, 2, 3, 4]
-range(0, 10, 2)                 // [0, 2, 4, 6, 8]
-range(5, 0, -1)                 // [5, 4, 3, 2, 1]
-generate(1, x => x * 2)        // 1, 2, 4, 8, 16, ... (infinite — use .take())
+sequenceOf(1, 2, 3); // from values
+asSequence([1, 2, 3]); // from any Iterable
+emptySequence<number>(); // empty
+range(1, 5); // [1, 2, 3, 4]
+range(0, 10, 2); // [0, 2, 4, 6, 8]
+range(5, 0, -1); // [5, 4, 3, 2, 1]
+generate(1, (x) => x * 2); // 1, 2, 4, 8, 16, ... (infinite — use .take())
 ```
 
 ## Lazy transformations
@@ -140,16 +146,16 @@ seq.forEach((x, i) => ...)
 `Sequence<T>` extends the native `Iterator<T>`, so all built-in iterator helpers work directly:
 
 ```ts
-seq.every(x => x > 0)
-seq.some(x => x > 0)
-seq.find(x => x > 1)
-seq.reduce((a, b) => a + b)
-seq.flatMap(x => [x, x * 2])
-seq.map(x => x * 2)
-seq.filter(x => x > 1)
-seq.take(3)
-seq.drop(2)
-seq.toArray()
+seq.every((x) => x > 0);
+seq.some((x) => x > 0);
+seq.find((x) => x > 1);
+seq.reduce((a, b) => a + b);
+seq.flatMap((x) => [x, x * 2]);
+seq.map((x) => x * 2);
+seq.filter((x) => x > 1);
+seq.take(3);
+seq.drop(2);
+seq.toArray();
 ```
 
 ## Development
