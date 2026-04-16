@@ -2,7 +2,7 @@ import { contains, getIterator, isIterable } from "./utils";
 
 const TruePredicate = () => true;
 
-export class Sequence<T> implements IterableIterator<T> {
+export class Sequence<T> extends Iterator<T> {
   private readonly _next: () => IteratorResult<T>;
 
   public next(): IteratorResult<T> {
@@ -10,38 +10,20 @@ export class Sequence<T> implements IterableIterator<T> {
   }
 
   constructor(iterator: Iterator<T>) {
+    super();
     this._next = iterator.next.bind(iterator);
   }
 
-  [Symbol.iterator](): IterableIterator<T> {
-    return this;
-  }
-
   all(predicate: (item: T) => boolean): boolean {
-    for (let item of this) {
-      if (!predicate(item)) {
-        return false;
-      }
-    }
-    return true;
+    return this.every(predicate);
   }
 
   any(predicate: (item: T) => boolean = TruePredicate): boolean {
-    for (let item of this) {
-      if (predicate(item)) {
-        return true;
-      }
-    }
-    return false;
+    return this.some(predicate);
   }
 
   none<T>(this: Sequence<T>, predicate: (value: T) => boolean = TruePredicate): boolean {
-    for (let item of this) {
-      if (predicate(item)) {
-        return false;
-      }
-    }
-    return true;
+    return !this.some(predicate);
   }
 
   lastOrNull(predicate: (value: T) => boolean = TruePredicate): T | null {
@@ -56,26 +38,13 @@ export class Sequence<T> implements IterableIterator<T> {
 
   firstOrNull(predicate: (item: T) => boolean = TruePredicate): T | null {
     for (let item of this) {
-      if (predicate(item)) {
-        return item;
-      }
+      if (predicate(item)) return item;
     }
     return null;
   }
 
   contains(element: T): boolean {
-    for (let item of this) {
-      if (element === item) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  forEach(action: (item: T) => void) {
-    for (let item of this) {
-      action(item);
-    }
+    return this.some((item) => item === element);
   }
 
   onEach(action: (item: T) => void): Sequence<T> {
@@ -94,14 +63,8 @@ export class Sequence<T> implements IterableIterator<T> {
     }
   }
 
-  filter(predicate: (item: T) => boolean): Sequence<T> {
-    return this.rewrap(function* (this: Iterable<T>) {
-      for (let item of this) {
-        if (predicate(item)) {
-          yield item;
-        }
-      }
-    });
+  filter(predicate: (item: T, index: number) => boolean): Sequence<T> {
+    return new Sequence(super.filter(predicate));
   }
 
   filterIndexed(predicate: (index: number, item: T) => boolean): Sequence<T> {
@@ -123,8 +86,9 @@ export class Sequence<T> implements IterableIterator<T> {
     return this.filter((it) => it !== null);
   }
 
-  find(predicate: (item: T) => boolean = TruePredicate): T | null {
-    return this.firstOrNull(predicate);
+  // Override to add a default predicate (native Iterator.find requires one).
+  find(predicate: (item: T, index: number) => unknown = TruePredicate): T | undefined {
+    return this.firstOrNull(predicate as (item: T) => boolean) ?? undefined;
   }
 
   findLast(predicate: (value: T) => boolean = TruePredicate): T | null {
@@ -173,12 +137,8 @@ export class Sequence<T> implements IterableIterator<T> {
     return result;
   }
 
-  map<U, S>(transform: (element: T) => S): Sequence<S> {
-    return this.rewrap(function* (this: Iterable<T>) {
-      for (let item of this) {
-        yield transform(item);
-      }
-    });
+  map<S>(transform: (element: T, index: number) => S): Sequence<S> {
+    return new Sequence(super.map(transform));
   }
 
   mapIndexed<R>(transform: (index: number, value: T) => R): Sequence<R> {
@@ -191,10 +151,7 @@ export class Sequence<T> implements IterableIterator<T> {
   }
 
   mapNotNull<R>(transform: (value: T) => R | null): Sequence<R> {
-    return this.flatMap((value: T) => {
-      const item = transform(value);
-      return item !== null ? sequenceOf(item) : emptySequence();
-    });
+    return new Sequence(super.map(transform).filter((x): x is R => x !== null));
   }
 
   flatten() {
@@ -209,20 +166,12 @@ export class Sequence<T> implements IterableIterator<T> {
     });
   }
 
-  flatMap<U>(transform: (value: T) => Iterable<U>): Sequence<U> {
-    return this.rewrap(function* (this: Iterable<T>) {
-      for (let item of this) {
-        yield* transform(item);
-      }
-    });
+  flatMap<U>(transform: (value: T, index: number) => Iterable<U>): Sequence<U> {
+    return new Sequence(super.flatMap(transform));
   }
 
   fold<R>(initial: R, operation: (acc: R, element: T) => R): R {
-    let result = initial;
-    for (let item of this) {
-      result = operation(result, item);
-    }
-    return result;
+    return this.reduce(operation, initial);
   }
 
   foldIndexed<R>(initial: R, operation: (index: number, acc: R, element: T) => R): R {
@@ -231,14 +180,6 @@ export class Sequence<T> implements IterableIterator<T> {
     for (let item of this) {
       result = operation(index, result, item);
       index++;
-    }
-    return result;
-  }
-
-  reduce(operation: (acc: T, value: T) => T): T {
-    let result: T = this.first();
-    for (let item of this) {
-      result = operation(result, item);
     }
     return result;
   }
@@ -333,15 +274,7 @@ export class Sequence<T> implements IterableIterator<T> {
   }
 
   take(num: number = 1): Sequence<T> {
-    return this.rewrap(function* (this: Iterable<T>) {
-      let count = 0;
-      for (let item of this) {
-        if (count++ >= num) {
-          break;
-        }
-        yield item;
-      }
-    });
+    return new Sequence(super.take(Math.max(0, num)));
   }
 
   takeWhile(predicate: (item: T) => boolean): Sequence<T> {
@@ -356,22 +289,15 @@ export class Sequence<T> implements IterableIterator<T> {
   }
 
   drop(num: number = 1): Sequence<T> {
-    return this.rewrap(function* (this: Iterable<T>) {
-      let count = 0;
-      for (let item of this) {
-        if (count++ >= num) {
-          yield item;
-        }
-      }
-    });
+    return new Sequence(super.drop(Math.max(0, num)));
   }
 
   distinct(): Sequence<T> {
     return this.rewrap(function* (this: Iterable<T>) {
-      const items: T[] = [];
+      const seen = new Set<T>();
       for (let item of this) {
-        if (items.indexOf(item) < 0) {
-          items.push(item);
+        if (!seen.has(item)) {
+          seen.add(item);
           yield item;
         }
       }
@@ -380,11 +306,11 @@ export class Sequence<T> implements IterableIterator<T> {
 
   distinctBy<K>(selector: (item: T) => K): Sequence<T> {
     return this.rewrap(function* (this: Iterable<T>) {
-      const keys: K[] = [];
+      const seen = new Set<K>();
       for (let item of this) {
         const key = selector(item);
-        if (keys.indexOf(key) < 0) {
-          keys.push(key);
+        if (!seen.has(key)) {
+          seen.add(key);
           yield item;
         }
       }
@@ -607,12 +533,8 @@ export class Sequence<T> implements IterableIterator<T> {
     return asSequence(this.toArray().reverse());
   }
 
-  toArray(): T[] {
-    return [...this];
-  }
-
   toSet<T>(this: Sequence<T>, set?: Set<T>): Set<T> {
-    const result = set || new Set();
+    const result = set || new Set<T>();
     for (let item of this) {
       result.add(item);
     }

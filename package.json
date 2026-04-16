@@ -17,7 +17,7 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "format": "oxfmt --write .",
-    "test": "vitest",
+    "test": "vitest --run",
     "typecheck": "tsc --noEmit",
     "release": "bumpp",
     "prepublishOnly": "pnpm run build"
