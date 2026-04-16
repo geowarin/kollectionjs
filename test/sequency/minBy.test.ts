@@ -7,8 +7,8 @@ describe("minBy", () => {
     expect(num).toEqual({ a: 1 });
   });
 
-  it("should return null on empty sequence", () => {
+  it("should return undefined on empty sequence", () => {
     const num = emptySequence().minBy(() => void 0);
-    expect(num).toBeNull();
+    expect(num).toBeUndefined();
   });
 });

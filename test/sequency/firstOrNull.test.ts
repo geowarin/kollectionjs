@@ -9,11 +9,11 @@ describe("firstOrNull", () => {
     expect(result).toBe(3);
   });
 
-  it("should return null on empty sequence", () => {
+  it("should return undefined on empty sequence", () => {
     const result = sequenceOf(1, 2, 3)
       .filter((it) => it > 3)
       .firstOrNull();
-    expect(result).toBeNull();
+    expect(result).toBeUndefined();
   });
 
   it("should return first element matching predicate", () => {

@@ -7,8 +7,8 @@ describe("max", () => {
     expect(num).toBe(6);
   });
 
-  it("should return null on empty sequence", () => {
+  it("should return undefined on empty sequence", () => {
     const num = emptySequence().max();
-    expect(num).toBeNull();
+    expect(num).toBeUndefined();
   });
 });

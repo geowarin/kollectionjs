@@ -26,8 +26,8 @@ export class Sequence<T> extends Iterator<T> {
     return !this.some(predicate);
   }
 
-  lastOrNull(predicate: (value: T) => boolean = TruePredicate): T | null {
-    let last = null;
+  lastOrNull(predicate: (value: T) => boolean = TruePredicate): T | undefined {
+    let last: T | undefined = undefined;
     for (let item of this) {
       if (predicate(item)) {
         last = item;
@@ -36,11 +36,11 @@ export class Sequence<T> extends Iterator<T> {
     return last;
   }
 
-  firstOrNull(predicate: (item: T) => boolean = TruePredicate): T | null {
+  firstOrNull(predicate: (item: T) => boolean = TruePredicate): T | undefined {
     for (let item of this) {
       if (predicate(item)) return item;
     }
-    return null;
+    return undefined;
   }
 
   contains(element: T): boolean {
@@ -88,10 +88,10 @@ export class Sequence<T> extends Iterator<T> {
 
   // Override to add a default predicate (native Iterator.find requires one).
   find(predicate: (item: T, index: number) => unknown = TruePredicate): T | undefined {
-    return this.firstOrNull(predicate as (item: T) => boolean) ?? undefined;
+    return this.firstOrNull(predicate as (item: T) => boolean);
   }
 
-  findLast(predicate: (value: T) => boolean = TruePredicate): T | null {
+  findLast(predicate: (value: T) => boolean = TruePredicate): T | undefined {
     return this.lastOrNull(predicate);
   }
 
@@ -105,7 +105,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   single(predicate: (value: T) => boolean = TruePredicate): T {
-    let result = null;
+    let result: T | undefined = undefined;
     let count = 0;
     for (let item of this) {
       if (predicate(item)) {
@@ -122,8 +122,8 @@ export class Sequence<T> extends Iterator<T> {
     return result as T;
   }
 
-  singleOrNull(predicate: (value: T) => boolean = TruePredicate): T | null {
-    let result = null;
+  singleOrNull(predicate: (value: T) => boolean = TruePredicate): T | undefined {
+    let result: T | undefined = undefined;
     let count = 0;
     for (let item of this) {
       if (predicate(item)) {
@@ -132,7 +132,7 @@ export class Sequence<T> extends Iterator<T> {
       }
     }
     if (count > 1) {
-      return null;
+      return undefined;
     }
     return result;
   }
@@ -209,8 +209,8 @@ export class Sequence<T> extends Iterator<T> {
     });
   }
 
-  elementAtOrNull(index: number): T | null {
-    return this.elementAtOrElse(index, () => null as any);
+  elementAtOrNull(index: number): T | undefined {
+    return this.elementAtOrElse(index, () => undefined as any);
   }
 
   elementAtOrElse(index: number, defaultValue: (index: number) => T): T {
@@ -259,7 +259,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   last(predicate: (value: T) => boolean = TruePredicate): T {
-    let last = null;
+    let last: T | undefined = undefined;
     let count = 0;
     for (let item of this) {
       count++;
@@ -331,8 +331,8 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
-  max<T>(this: Sequence<T>): T | null {
-    let result: T | null = null;
+  max<T>(this: Sequence<T>): T | undefined {
+    let result: T | undefined = undefined;
     for (let item of this) {
       if (result == null || item > result) {
         result = item;
@@ -341,9 +341,9 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
-  maxBy<R>(selector: (value: T) => R): T | null {
-    let max: T | null = null;
-    let maxSelected: R | null = null;
+  maxBy<R>(selector: (value: T) => R): T | undefined {
+    let max: T | undefined = undefined;
+    let maxSelected: R | undefined = undefined;
     for (let item of this) {
       const value = selector(item);
       if (maxSelected == null || value > maxSelected) {
@@ -354,18 +354,18 @@ export class Sequence<T> extends Iterator<T> {
     return max;
   }
 
-  maxWith(compare: (a: T, b: T) => number): T | null {
-    let max: T | null = null;
+  maxWith(compare: (a: T, b: T) => number): T | undefined {
+    let max: T | undefined = undefined;
     for (let item of this) {
-      if (max == null || compare(item, max) > 0) {
+      if (max === undefined || compare(item, max) > 0) {
         max = item;
       }
     }
     return max;
   }
 
-  min(): T | null {
-    let result: T | null = null;
+  min(): T | undefined {
+    let result: T | undefined = undefined;
     for (let item of this) {
       if (result == null || item < result) {
         result = item;
@@ -374,9 +374,9 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
-  minBy<R>(selector: (value: T) => R): T | null {
-    let min: T | null = null;
-    let minSelected: R | null = null;
+  minBy<R>(selector: (value: T) => R): T | undefined {
+    let min: T | undefined = undefined;
+    let minSelected: R | undefined = undefined;
     for (let item of this) {
       const value = selector(item);
       if (minSelected == null || value < minSelected) {
@@ -387,10 +387,10 @@ export class Sequence<T> extends Iterator<T> {
     return min;
   }
 
-  minWith(compare: (a: T, b: T) => number): T | null {
-    let min: T | null = null;
+  minWith(compare: (a: T, b: T) => number): T | undefined {
+    let min: T | undefined = undefined;
     for (let item of this) {
-      if (min == null || compare(item, min) < 0) {
+      if (min === undefined || compare(item, min) < 0) {
         min = item;
       }
     }

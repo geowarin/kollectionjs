@@ -17,8 +17,8 @@ describe("elementAtOrNull", () => {
     expect(item).toBe(3);
   });
 
-  it("should return null when index out of bounds", () => {
+  it("should return undefined when index out of bounds", () => {
     const item = sequenceOf(1, 2, 3).elementAtOrNull(3);
-    expect(item).toBeNull();
+    expect(item).toBeUndefined();
   });
 });

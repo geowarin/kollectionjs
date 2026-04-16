@@ -7,8 +7,8 @@ describe("maxBy", () => {
     expect(num).toEqual({ a: 3 });
   });
 
-  it("should return null on empty sequence", () => {
+  it("should return undefined on empty sequence", () => {
     const num = emptySequence().maxBy(() => void 0);
-    expect(num).toBeNull();
+    expect(num).toBeUndefined();
   });
 });
