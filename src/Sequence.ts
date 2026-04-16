@@ -22,7 +22,7 @@ export class Sequence<T> extends Iterator<T> {
     return this.some(predicate);
   }
 
-  none<T>(this: Sequence<T>, predicate: (value: T) => boolean = TruePredicate): boolean {
+  none(predicate: (value: T) => boolean = TruePredicate): boolean {
     return !this.some(predicate);
   }
 
@@ -56,13 +56,6 @@ export class Sequence<T> extends Iterator<T> {
     });
   }
 
-  forEachIndexed(action: (index: number, value: T) => void) {
-    let index = 0;
-    for (let item of this) {
-      action(index++, item);
-    }
-  }
-
   filter(predicate: (item: T, index: number) => boolean): Sequence<T> {
     return new Sequence(super.filter(predicate));
   }
@@ -71,8 +64,8 @@ export class Sequence<T> extends Iterator<T> {
     return this.filter((value: T) => !predicate(value));
   }
 
-  filterNotNull(): Sequence<T> {
-    return this.filter((it) => it !== null);
+  filterNotNull(): Sequence<NonNullable<T>> {
+    return new Sequence(super.filter((it): it is NonNullable<T> => it != null));
   }
 
   // Override to add a default predicate (native Iterator.find requires one).
@@ -261,7 +254,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   takeWhile(predicate: (item: T) => boolean): Sequence<T> {
-    return this.pipe(function* () {
+    return this.pipe(function* (this: Iterable<T>) {
       for (let item of this) {
         if (!predicate(item)) {
           break;
@@ -276,7 +269,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   distinct(): Sequence<T> {
-    return this.pipe(function* () {
+    return this.pipe(function* (this: Iterable<T>) {
       const seen = new Set<T>();
       for (let item of this) {
         if (!seen.has(item)) {
@@ -288,7 +281,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   distinctBy<K>(selector: (item: T) => K): Sequence<T> {
-    return this.pipe(function* () {
+    return this.pipe(function* (this: Iterable<T>) {
       const seen = new Set<K>();
       for (let item of this) {
         const key = selector(item);
@@ -314,7 +307,7 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
-  max<T>(this: Sequence<T>): T | undefined {
+  max(): T | undefined {
     let result: T | undefined = undefined;
     for (let item of this) {
       if (result == null || item > result) {
@@ -393,7 +386,7 @@ export class Sequence<T> extends Iterator<T> {
   plus(other: Iterable<T>): Sequence<T>;
   plus(data: T | Iterable<T>): Sequence<T> {
     const other = isIterable(data) ? data : [data];
-    return this.pipe(function* () {
+    return this.pipe(function* (this: Iterable<T>) {
       for (let item of this) {
         yield item;
       }
@@ -502,9 +495,9 @@ export class Sequence<T> extends Iterator<T> {
     });
   }
 
-  unzip<T, S>(this: Sequence<[T, S]>): [T[], S[]] {
-    const array1: T[] = [];
-    const array2: S[] = [];
+  unzip<A, B>(this: Sequence<[A, B]>): [A[], B[]] {
+    const array1: A[] = [];
+    const array2: B[] = [];
     for (let [first, second] of this) {
       array1.push(first);
       array2.push(second);
@@ -516,7 +509,7 @@ export class Sequence<T> extends Iterator<T> {
     return asSequence(this.toArray().reverse());
   }
 
-  toSet<T>(this: Sequence<T>, set?: Set<T>): Set<T> {
+  toSet(set?: Set<T>): Set<T> {
     const result = set || new Set<T>();
     for (let item of this) {
       result.add(item);

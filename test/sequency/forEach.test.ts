@@ -9,4 +9,12 @@ describe("forEach", () => {
     expect(array[1]).toBe(2);
     expect(array[2]).toBe(3);
   });
+
+  it("should call action for each element with index", () => {
+    const array: string[] = [];
+    sequenceOf(1, 2, 3).forEach((value, index) => array.push(`${index}: ${value}`));
+    expect(array[0]).toBe("0: 1");
+    expect(array[1]).toBe("1: 2");
+    expect(array[2]).toBe("2: 3");
+  });
 });
