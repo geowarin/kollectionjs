@@ -22,4 +22,12 @@ describe("sortedBy", () => {
     const array = sequenceOf(a, b, c).sortedBy((it) => it.name).toArray();
     expect(array).toEqual([b, c, a]);
   });
+
+  it("sortedByDescending should sort by selector in descending order", () => {
+    const a = { name: "Charlie", age: 30 };
+    const b = { name: "Alice", age: 25 };
+    const c = { name: "Bob", age: 35 };
+    const array = sequenceOf(a, b, c).sortedByDescending((it) => it.age).toArray();
+    expect(array).toEqual([c, a, b]);
+  });
 });

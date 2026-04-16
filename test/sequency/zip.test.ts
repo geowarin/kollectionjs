@@ -18,4 +18,11 @@ describe("zip", () => {
       .toArray();
     expect(array.length).toBe(3);
   });
+
+  it("should apply transform to each pair", () => {
+    const array = sequenceOf("a", "b", "c")
+      .zip(sequenceOf(1, 2, 3), (a, b) => `${a}${b}`)
+      .toArray();
+    expect(array).toEqual(["a1", "b2", "c3"]);
+  });
 });

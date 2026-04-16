@@ -26,6 +26,14 @@ export class Sequence<T> extends Iterator<T> {
     return !this.some(predicate);
   }
 
+  isEmpty(): boolean {
+    return this.none();
+  }
+
+  isNotEmpty(): boolean {
+    return this.any();
+  }
+
   lastOrNull(predicate: (value: T) => boolean = TruePredicate): T | undefined {
     let last: T | undefined = undefined;
     for (let item of this) {
@@ -45,6 +53,15 @@ export class Sequence<T> extends Iterator<T> {
 
   contains(element: T): boolean {
     return this.some((item) => item === element);
+  }
+
+  withIndex(): Sequence<{ index: number; value: T }> {
+    return this.pipe(function* (this: Iterable<T>) {
+      let index = 0;
+      for (const value of this) {
+        yield { index: index++, value };
+      }
+    }) as Sequence<{ index: number; value: T }>;
   }
 
   onEach(action: (item: T) => void): Sequence<T> {
@@ -69,8 +86,12 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   // Override to add a default predicate (native Iterator.find requires one).
-  find(predicate: (item: T, index: number) => unknown = TruePredicate): T | undefined {
-    return this.firstOrNull(predicate as (item: T) => boolean);
+  find(predicate: (value: T, index: number) => unknown = TruePredicate): T | undefined {
+    let index = 0;
+    for (const item of this) {
+      if (predicate(item, index++)) return item;
+    }
+    return undefined;
   }
 
   findLast(predicate: (value: T) => boolean = TruePredicate): T | undefined {
@@ -94,7 +115,7 @@ export class Sequence<T> extends Iterator<T> {
         result = item;
         count++;
         if (count > 1) {
-          throw new Error("Expect single element");
+          throw new Error("More than one element");
         }
       }
     }
@@ -125,16 +146,12 @@ export class Sequence<T> extends Iterator<T> {
     return new Sequence(super.map(transform).filter((x): x is R => x != null));
   }
 
-  flatten() {
-    return this.pipe(function* (this: Iterable<T>) {
-      for (let item of this) {
-        if (typeof item !== "string" && isIterable(item)) {
-          yield* item;
-        } else {
-          yield item;
-        }
+  flatten<U>(this: Sequence<Iterable<U>>): Sequence<U> {
+    return this.pipe(function* (this: Iterable<Iterable<U>>) {
+      for (const item of this) {
+        yield* item;
       }
-    });
+    }) as Sequence<U>;
   }
 
   flatMap<U>(transform: (value: T, index: number) => Iterable<U>): Sequence<U> {
@@ -145,11 +162,11 @@ export class Sequence<T> extends Iterator<T> {
     return this.reduce(operation, initial);
   }
 
-  foldIndexed<R>(initial: R, operation: (index: number, acc: R, element: T) => R): R {
+  foldIndexed<R>(initial: R, operation: (acc: R, element: T, index: number) => R): R {
     let result = initial;
     let index = 0;
     for (let item of this) {
-      result = operation(index, result, item);
+      result = operation(result, item, index);
       index++;
     }
     return result;
@@ -170,11 +187,11 @@ export class Sequence<T> extends Iterator<T> {
     return this.scan(initial, operation);
   }
 
-  reduceIndexed(operation: (index: number, acc: T, element: T) => T): T {
+  reduceIndexed(operation: (acc: T, element: T, index: number) => T): T {
     let result: T = this.first();
     let index = 1;
     for (let item of this) {
-      result = operation(index++, result, item);
+      result = operation(result, item, index++);
     }
     return result;
   }
@@ -283,6 +300,17 @@ export class Sequence<T> extends Iterator<T> {
     return new Sequence(super.drop(Math.max(0, num)));
   }
 
+  dropWhile(predicate: (item: T) => boolean): Sequence<T> {
+    return this.pipe(function* (this: Iterable<T>) {
+      let dropping = true;
+      for (const item of this) {
+        if (dropping && predicate(item)) continue;
+        dropping = false;
+        yield item;
+      }
+    });
+  }
+
   distinct(): Sequence<T> {
     return this.pipe(function* (this: Iterable<T>) {
       const seen = new Set<T>();
@@ -308,15 +336,18 @@ export class Sequence<T> extends Iterator<T> {
     });
   }
 
-  groupBy<K>(keySelector: (value: T) => K): Map<K, T[]> {
-    const result = new Map<K, T[]>();
-    for (let item of this) {
+  groupBy<K>(keySelector: (value: T) => K): Map<K, T[]>;
+  groupBy<K, V>(keySelector: (value: T) => K, valueTransform: (value: T) => V): Map<K, V[]>;
+  groupBy<K, V>(keySelector: (value: T) => K, valueTransform?: (value: T) => V): Map<K, (T | V)[]> {
+    const result = new Map<K, (T | V)[]>();
+    for (const item of this) {
       const key = keySelector(item);
+      const value = valueTransform ? valueTransform(item) : item;
       const array = result.get(key);
       if (array == null) {
-        result.set(key, [item]);
+        result.set(key, [value]);
       } else {
-        array.push(item);
+        array.push(value);
       }
     }
     return result;
@@ -439,24 +470,48 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
-  chunk(chunkSize: number): T[][] {
-    if (chunkSize < 1) {
-      throw new Error("chunkSize must be > 0 but is " + chunkSize);
-    }
-    const result: T[][] = [];
-    let posInChunk = 0;
-    for (let item of this) {
-      if (posInChunk === 0) {
-        result.push([item]);
-      } else {
-        result[result.length - 1].push(item);
-      }
-      if (++posInChunk === chunkSize) posInChunk = 0;
+  associateWith<V>(valueSelector: (value: T) => V): Map<T, V> {
+    const result = new Map<T, V>();
+    for (const item of this) {
+      result.set(item, valueSelector(item));
     }
     return result;
   }
 
-  partition(predicate: (value: T) => boolean): { true: T[]; false: T[] } {
+  windowed(size: number, step: number = 1, partialWindows: boolean = false): Sequence<T[]> {
+    if (size < 1) throw new Error("size must be > 0 but is " + size);
+    if (step < 1) throw new Error("step must be > 0 but is " + step);
+    const arr = this.toArray();
+    return new Sequence(
+      (function* () {
+        for (let i = 0; i < arr.length; i += step) {
+          const window = arr.slice(i, i + size);
+          if (window.length === size || partialWindows) {
+            yield window;
+          }
+        }
+      })(),
+    );
+  }
+
+  chunk(chunkSize: number): Sequence<T[]> {
+    if (chunkSize < 1) {
+      throw new Error("chunkSize must be > 0 but is " + chunkSize);
+    }
+    return this.pipe(function* (this: Iterable<T>) {
+      let chunk: T[] = [];
+      for (const item of this) {
+        chunk.push(item);
+        if (chunk.length === chunkSize) {
+          yield chunk;
+          chunk = [];
+        }
+      }
+      if (chunk.length > 0) yield chunk;
+    }) as Sequence<T[]>;
+  }
+
+  partition(predicate: (value: T) => boolean): [T[], T[]] {
     const arrayTrue: T[] = [];
     const arrayFalse: T[] = [];
     for (let item of this) {
@@ -466,7 +521,7 @@ export class Sequence<T> extends Iterator<T> {
         arrayFalse.push(item);
       }
     }
-    return { true: arrayTrue, false: arrayFalse };
+    return [arrayTrue, arrayFalse];
   }
 
   average(this: Sequence<number>): number {
@@ -509,19 +564,20 @@ export class Sequence<T> extends Iterator<T> {
     return prefix + parts.join(separator) + postfix;
   }
 
-  zip<S>(other: Iterable<S>): Sequence<[T, S]> {
+  zip<S>(other: Iterable<S>): Sequence<[T, S]>;
+  zip<S, R>(other: Iterable<S>, transform: (a: T, b: S) => R): Sequence<R>;
+  zip<S, R>(other: Iterable<S>, transform?: (a: T, b: S) => R): Sequence<[T, S]> | Sequence<R> {
     const otherIterator: Iterator<S> = getIterator(other);
     const thisIterator: Iterator<T> = this;
+    const fn = transform ?? ((a: T, b: S): [T, S] => [a, b]);
     return this.pipe(function* () {
       while (true) {
-        let otherNext = otherIterator.next();
-        let thisNext = thisIterator.next();
-        if (otherNext.done || thisNext.done) {
-          return;
-        }
-        yield [thisNext.value, otherNext.value] as [T, S];
+        const otherNext = otherIterator.next();
+        const thisNext = thisIterator.next();
+        if (otherNext.done || thisNext.done) return;
+        yield (fn as (a: T, b: S) => [T, S] | R)(thisNext.value, otherNext.value);
       }
-    });
+    }) as Sequence<[T, S]> | Sequence<R>;
   }
 
   unzip<A, B>(this: Sequence<[A, B]>): [A[], B[]] {
@@ -560,7 +616,7 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   sorted(): Sequence<T> {
-    return asSequence(this.toArray().sort());
+    return asSequence(this.toArray().sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)));
   }
 
   sortedBy<R>(selector: (value: T) => R): Sequence<T> {
@@ -577,6 +633,20 @@ export class Sequence<T> extends Iterator<T> {
     return asSequence(this.toArray().sort(comparator));
   }
 
+  sortedDescending(): Sequence<T> {
+    return asSequence(this.toArray().sort((a, b) => (a < b ? 1 : a > b ? -1 : 0)));
+  }
+
+  sortedByDescending<R>(selector: (value: T) => R): Sequence<T> {
+    return asSequence(
+      this.toArray().sort((a, b) => {
+        const ka = selector(a);
+        const kb = selector(b);
+        return ka < kb ? 1 : ka > kb ? -1 : 0;
+      }),
+    );
+  }
+
   reverse(): Sequence<T> {
     return asSequence(this.toArray().reverse());
   }
@@ -585,6 +655,14 @@ export class Sequence<T> extends Iterator<T> {
     const result = set || new Set<T>();
     for (let item of this) {
       result.add(item);
+    }
+    return result;
+  }
+
+  toMap<K, V>(this: Sequence<[K, V]>): Map<K, V> {
+    const result = new Map<K, V>();
+    for (const [key, value] of this) {
+      result.set(key, value);
     }
     return result;
   }
@@ -604,4 +682,39 @@ export function emptySequence<T>(): Sequence<T> {
 
 export function asSequence<T>(iterable: Iterable<T>): Sequence<T> {
   return new Sequence(getIterator(iterable));
+}
+
+export function concat<T>(...iterables: Iterable<T>[]): Sequence<T> {
+  return new Sequence(
+    (function* () {
+      for (const iterable of iterables) {
+        yield* iterable;
+      }
+    })(),
+  );
+}
+
+export function range(start: number, endExclusive: number, step: number = 1): Sequence<number> {
+  if (step === 0) throw new Error("step must not be zero");
+  return new Sequence(
+    (function* () {
+      if (step > 0) {
+        for (let i = start; i < endExclusive; i += step) yield i;
+      } else {
+        for (let i = start; i > endExclusive; i += step) yield i;
+      }
+    })(),
+  );
+}
+
+export function generate<T>(seed: T, next: (value: T) => T | null | undefined): Sequence<T> {
+  return new Sequence(
+    (function* () {
+      let current: T | null | undefined = seed;
+      while (current != null) {
+        yield current;
+        current = next(current);
+      }
+    })(),
+  );
 }

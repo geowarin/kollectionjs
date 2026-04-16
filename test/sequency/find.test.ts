@@ -20,4 +20,9 @@ describe("find", () => {
     const result = sequenceOf(1, 2, 3).find((it) => it > 2);
     expect(result).toBe(3);
   });
+
+  it("should pass index to predicate", () => {
+    const result = sequenceOf("a", "b", "c").find((_value, index) => index === 2);
+    expect(result).toBe("c");
+  });
 });

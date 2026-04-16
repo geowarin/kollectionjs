@@ -16,4 +16,15 @@ describe("groupBy", () => {
     expect(map.get(2)![1]).toBe(d);
     expect(map.get(3)![0]).toBe(c);
   });
+
+  it("should group by key and transform values", () => {
+    const map = sequenceOf(
+      { dept: "eng", name: "Alice" },
+      { dept: "eng", name: "Bob" },
+      { dept: "hr", name: "Carol" },
+    ).groupBy((it) => it.dept, (it) => it.name);
+
+    expect(map.get("eng")).toEqual(["Alice", "Bob"]);
+    expect(map.get("hr")).toEqual(["Carol"]);
+  });
 });
