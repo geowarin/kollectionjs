@@ -1,41 +1,34 @@
 {
   "name": "kollectionjs",
   "version": "1.0.0",
-  "description": "Collection utilities inspired by kotlin for javascript",
-  "repository": "https://geowarin/kollectionjs",
-  "author": "Geoffroy Warin",
-  "license": "MIT",
   "private": false,
-  "browser": "dist/kollection.umd.js",
-  "main": "dist/kollection.js",
-  "module": "dist/kollection.esm.js",
-  "typings": "dist/index",
+  "description": "Collection utilities inspired by kotlin for javascript",
+  "license": "MIT",
+  "author": "Geoffroy Warin",
+  "repository": "https://geowarin/kollectionjs",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "test": "jest",
-    "build": "microbundle"
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "format": "oxfmt --write .",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "release": "bumpp",
+    "prepublishOnly": "pnpm run build"
   },
   "devDependencies": {
-    "@types/jest": "^23.1.3",
-    "jest": "^23.2.0",
-    "microbundle": "^0.4.4",
-    "ts-jest": "^22.4.6",
-    "typescript": "^2.9.2"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "transform": {
-      "^.+\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-    },
-    "testMatch": [
-      "<rootDir>/test/**/*.(ts|tsx)"
-    ],
-    "cacheDirectory": "./.cache/jest-cache",
-    "modulePaths": [
-      "src/main"
-    ]
+    "@types/node": "^25.5.0",
+    "@typescript/native-preview": "7.0.0-dev.20260416.2",
+    "bumpp": "^11.0.1",
+    "oxfmt": "^0.45.0",
+    "tsdown": "^0.21.7",
+    "vite": "^8.0.8",
+    "vitest": "^4.1.4"
   }
 }

@@ -1,5 +1,6 @@
-import {sequenceOf} from "../src/Sequence";
-import {getIterator} from "../src/utils";
+import { describe, it, expect } from "vitest";
+import { sequenceOf } from "../src/Sequence";
+import { getIterator } from "../src/utils";
 
 describe("sequence", () => {
   it("is iterable", () => {
@@ -14,8 +15,8 @@ describe("sequence", () => {
   it("can chain operations", () => {
     const sequence = sequenceOf(1, 2, 3);
     let result = sequence
-      .map(it => it * 2)
-      .filter(it => it % 3 == 0)
+      .map((it) => it * 2)
+      .filter((it) => it % 3 == 0)
       .toArray();
 
     expect(result).toEqual([6]);

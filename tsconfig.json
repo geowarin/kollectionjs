@@ -1,15 +1,20 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": [
-      "es2015"
-    ],
-    "rootDir": "src",
+    "lib": ["es2023"],
+    "moduleDetection": "force",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "strict": true,
+    "noUnusedLocals": true,
     "declaration": true,
-    "sourceMap": true,
-    "strict": true
+    "emitDeclarationOnly": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true
   },
-  "exclude": [
-    "test"
-  ]
+  "include": ["src"]
 }
