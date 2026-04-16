@@ -155,6 +155,21 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
+  scan<R>(initial: R, operation: (acc: R, element: T) => R): Sequence<R> {
+    return this.pipe(function* (this: Iterable<T>) {
+      let acc = initial;
+      yield acc;
+      for (const item of this) {
+        acc = operation(acc, item);
+        yield acc;
+      }
+    }) as Sequence<R>;
+  }
+
+  runningFold<R>(initial: R, operation: (acc: R, element: T) => R): Sequence<R> {
+    return this.scan(initial, operation);
+  }
+
   reduceIndexed(operation: (index: number, acc: T, element: T) => T): T {
     let result: T = this.first();
     let index = 1;
@@ -517,6 +532,31 @@ export class Sequence<T> extends Iterator<T> {
       array2.push(second);
     }
     return [array1, array2];
+  }
+
+  zipWithNext(): Sequence<[T, T]>;
+  zipWithNext<R>(transform: (a: T, b: T) => R): Sequence<R>;
+  zipWithNext<R>(transform?: (a: T, b: T) => R): Sequence<[T, T]> | Sequence<R> {
+    if (transform) {
+      return this.pipe(function* (this: Iterable<T>) {
+        let prev: T | undefined = undefined;
+        let hasPrev = false;
+        for (const item of this) {
+          if (hasPrev) yield transform(prev as T, item);
+          prev = item;
+          hasPrev = true;
+        }
+      }) as Sequence<R>;
+    }
+    return this.pipe(function* (this: Iterable<T>) {
+      let prev: T | undefined = undefined;
+      let hasPrev = false;
+      for (const item of this) {
+        if (hasPrev) yield [prev, item] as [T, T];
+        prev = item;
+        hasPrev = true;
+      }
+    }) as Sequence<[T, T]>;
   }
 
   sorted(): Sequence<T> {
