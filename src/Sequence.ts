@@ -14,11 +14,11 @@ export class Sequence<T> extends Iterator<T> {
     this._next = iterator.next.bind(iterator);
   }
 
-  all(predicate: (item: T) => boolean): boolean {
+  all(predicate: (value: T) => boolean): boolean {
     return this.every(predicate);
   }
 
-  any(predicate: (item: T) => boolean = TruePredicate): boolean {
+  any(predicate: (value: T) => boolean = TruePredicate): boolean {
     return this.some(predicate);
   }
 
@@ -44,7 +44,7 @@ export class Sequence<T> extends Iterator<T> {
     return last;
   }
 
-  firstOrNull(predicate: (item: T) => boolean = TruePredicate): T | undefined {
+  firstOrNull(predicate: (value: T) => boolean = TruePredicate): T | undefined {
     for (let item of this) {
       if (predicate(item)) return item;
     }
@@ -64,7 +64,7 @@ export class Sequence<T> extends Iterator<T> {
     }) as Sequence<{ index: number; value: T }>;
   }
 
-  onEach(action: (item: T) => void): Sequence<T> {
+  onEach(action: (value: T) => void): Sequence<T> {
     return this.pipe(function* (this: Iterable<T>) {
       for (let item of this) {
         action(item);
@@ -73,7 +73,7 @@ export class Sequence<T> extends Iterator<T> {
     });
   }
 
-  filter(predicate: (item: T, index: number) => boolean): Sequence<T> {
+  filter(predicate: (value: T, index: number) => boolean): Sequence<T> {
     return new Sequence(super.filter(predicate));
   }
 
@@ -98,7 +98,7 @@ export class Sequence<T> extends Iterator<T> {
     return this.lastOrNull(predicate);
   }
 
-  first(predicate: (item: T) => boolean = TruePredicate): T {
+  first(predicate: (value: T) => boolean = TruePredicate): T {
     for (let item of this) {
       if (predicate(item)) {
         return item;
@@ -138,7 +138,7 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
-  map<S>(transform: (element: T, index: number) => S): Sequence<S> {
+  map<S>(transform: (value: T, index: number) => S): Sequence<S> {
     return new Sequence(super.map(transform));
   }
 
@@ -158,11 +158,11 @@ export class Sequence<T> extends Iterator<T> {
     return new Sequence(super.flatMap(transform));
   }
 
-  fold<R>(initial: R, operation: (acc: R, element: T) => R): R {
+  fold<R>(initial: R, operation: (acc: R, value: T) => R): R {
     return this.reduce(operation, initial);
   }
 
-  foldIndexed<R>(initial: R, operation: (acc: R, element: T, index: number) => R): R {
+  foldIndexed<R>(initial: R, operation: (acc: R, value: T, index: number) => R): R {
     let result = initial;
     let index = 0;
     for (let item of this) {
@@ -172,7 +172,7 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
-  scan<R>(initial: R, operation: (acc: R, element: T) => R): Sequence<R> {
+  scan<R>(initial: R, operation: (acc: R, value: T) => R): Sequence<R> {
     return this.pipe(function* (this: Iterable<T>) {
       let acc = initial;
       yield acc;
@@ -183,11 +183,11 @@ export class Sequence<T> extends Iterator<T> {
     }) as Sequence<R>;
   }
 
-  runningFold<R>(initial: R, operation: (acc: R, element: T) => R): Sequence<R> {
+  runningFold<R>(initial: R, operation: (acc: R, value: T) => R): Sequence<R> {
     return this.scan(initial, operation);
   }
 
-  reduceIndexed(operation: (acc: T, element: T, index: number) => T): T {
+  reduceIndexed(operation: (acc: T, value: T, index: number) => T): T {
     let result: T = this.first();
     let index = 1;
     for (let item of this) {
@@ -196,7 +196,7 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
-  count(predicate: (item: T) => boolean = TruePredicate): number {
+  count(predicate: (value: T) => boolean = TruePredicate): number {
     let num = 0;
     for (let item of this) {
       if (predicate(item)) {
@@ -285,7 +285,7 @@ export class Sequence<T> extends Iterator<T> {
     return new Sequence(super.take(Math.max(0, num)));
   }
 
-  takeWhile(predicate: (item: T) => boolean): Sequence<T> {
+  takeWhile(predicate: (value: T) => boolean): Sequence<T> {
     return this.pipe(function* (this: Iterable<T>) {
       for (let item of this) {
         if (!predicate(item)) {
@@ -300,7 +300,7 @@ export class Sequence<T> extends Iterator<T> {
     return new Sequence(super.drop(Math.max(0, num)));
   }
 
-  dropWhile(predicate: (item: T) => boolean): Sequence<T> {
+  dropWhile(predicate: (value: T) => boolean): Sequence<T> {
     return this.pipe(function* (this: Iterable<T>) {
       let dropping = true;
       for (const item of this) {
@@ -323,7 +323,7 @@ export class Sequence<T> extends Iterator<T> {
     });
   }
 
-  distinctBy<K>(selector: (item: T) => K): Sequence<T> {
+  distinctBy<K>(selector: (value: T) => K): Sequence<T> {
     return this.pipe(function* (this: Iterable<T>) {
       const seen = new Set<K>();
       for (let item of this) {
