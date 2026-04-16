@@ -480,6 +480,20 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
+  joinToString(options?: {
+    separator?: string;
+    prefix?: string;
+    postfix?: string;
+    transform?: (value: T) => string;
+  }): string {
+    const { separator = ", ", prefix = "", postfix = "", transform } = options ?? {};
+    const parts: string[] = [];
+    for (const item of this) {
+      parts.push(transform ? transform(item) : String(item));
+    }
+    return prefix + parts.join(separator) + postfix;
+  }
+
   zip<S>(other: Iterable<S>): Sequence<[T, S]> {
     const otherIterator: Iterator<S> = getIterator(other);
     const thisIterator: Iterator<T> = this;
