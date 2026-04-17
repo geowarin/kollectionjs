@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { resolve } from "node:path";
 import { Application, DeclarationReflection, ReflectionKind, TSConfigReader } from "typedoc";
 
@@ -74,6 +75,7 @@ const updated =
   readme.slice(0, startIdx + START.length) + "\n" + generated + "\n" + readme.slice(endIdx);
 
 writeFileSync(resolve(ROOT, "README.md"), updated);
+execSync("node_modules/.bin/oxfmt --write README.md", { cwd: ROOT });
 console.log(
   `Updated README.md — ${factories.length} factory functions, ${methods.length} methods.`,
 );
