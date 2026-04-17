@@ -5,5 +5,6 @@
   "readme": "README.md",
   "includeVersion": true,
   "hideGenerator": true,
-  "excludeInternal": true
+  "excludeInternal": true,
+  "plugin": ["typedoc-github-theme"]
 }
