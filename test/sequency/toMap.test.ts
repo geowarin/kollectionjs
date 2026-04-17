@@ -17,7 +17,9 @@ describe("toMap", () => {
   });
 
   it("should work with zip output", () => {
-    const map = sequenceOf("x", "y", "z").zip(sequenceOf(1, 2, 3)).toMap();
+    const map = sequenceOf("x", "y", "z")
+      .zip(sequenceOf(1, 2, 3))
+      .toMap();
     expect(map.get("x")).toBe(1);
     expect(map.get("z")).toBe(3);
   });

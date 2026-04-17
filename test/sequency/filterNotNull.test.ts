@@ -21,7 +21,9 @@ describe("filterNotNull", () => {
   });
 
   it("should narrow the type to NonNullable", () => {
-    const result: number[] = sequenceOf<number | null | undefined>(1, null, 2, undefined).filterNotNull().toArray();
+    const result: number[] = sequenceOf<number | null | undefined>(1, null, 2, undefined)
+      .filterNotNull()
+      .toArray();
     expect(result).toEqual([1, 2]);
   });
 });

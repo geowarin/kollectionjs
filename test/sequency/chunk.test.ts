@@ -24,7 +24,10 @@ describe("chunk", () => {
       .chunk(2)
       .take(2)
       .toArray();
-    expect(chunks).toEqual([[1, 2], [3, 4]]);
+    expect(chunks).toEqual([
+      [1, 2],
+      [3, 4],
+    ]);
     expect(consumed).toBe(4);
   });
 

@@ -36,21 +36,16 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   /**
-   * Returns `true` if **all** elements satisfy the predicate.
-   * Returns `true` for an empty sequence (vacuous truth).
-   * @param predicate - Test applied to each element.
-   */
-  all(predicate: (value: T) => boolean): boolean {
-    return this.every(predicate);
-  }
-
-  /**
    * Returns `true` if **any** element satisfies the predicate.
    * When called with no argument, returns `true` if the sequence is non-empty.
    * @param predicate - Test applied to each element. Defaults to always-true.
    */
-  any(predicate: (value: T) => boolean = TruePredicate): boolean {
-    return this.some(predicate);
+  some(predicate: (value: T, index: number) => unknown = TruePredicate): boolean {
+    let index = 0;
+    for (const item of this) {
+      if (predicate(item, index++)) return true;
+    }
+    return false;
   }
 
   /**
@@ -73,7 +68,7 @@ export class Sequence<T> extends Iterator<T> {
    * Returns `true` if the sequence contains at least one element.
    */
   isNotEmpty(): boolean {
-    return this.any();
+    return this.some();
   }
 
   /**
@@ -81,7 +76,7 @@ export class Sequence<T> extends Iterator<T> {
    * When called with no argument, returns the last element or `undefined` for an empty sequence.
    * @param predicate - Test applied to each element. Defaults to always-true.
    */
-  lastOrNull(predicate: (value: T) => boolean = TruePredicate): T | undefined {
+  last(predicate: (value: T) => boolean = TruePredicate): T | undefined {
     let last: T | undefined = undefined;
     for (let item of this) {
       if (predicate(item)) {
@@ -96,7 +91,7 @@ export class Sequence<T> extends Iterator<T> {
    * When called with no argument, returns the first element or `undefined` for an empty sequence.
    * @param predicate - Test applied to each element. Defaults to always-true.
    */
-  firstOrNull(predicate: (value: T) => boolean = TruePredicate): T | undefined {
+  first(predicate: (value: T) => boolean = TruePredicate): T | undefined {
     for (let item of this) {
       if (predicate(item)) return item;
     }
@@ -182,57 +177,11 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   /**
-   * Returns the last element matching the predicate, or `undefined` if none match.
-   * When called with no argument, returns the last element or `undefined` for an empty sequence.
-   * @param predicate - Called with each element. Defaults to always-true.
-   */
-  findLast(predicate: (value: T) => boolean = TruePredicate): T | undefined {
-    return this.lastOrNull(predicate);
-  }
-
-  /**
-   * Returns the first element matching the predicate.
-   * @throws {Error} If no element matches.
-   * @param predicate - Called with each element. Defaults to always-true.
-   */
-  first(predicate: (value: T) => boolean = TruePredicate): T {
-    for (let item of this) {
-      if (predicate(item)) {
-        return item;
-      }
-    }
-    throw new Error("No such element");
-  }
-
-  /**
-   * Returns the single element matching the predicate.
-   * @throws {Error} If no element matches, or if more than one element matches.
-   * @param predicate - Called with each element. Defaults to always-true.
-   */
-  single(predicate: (value: T) => boolean = TruePredicate): T {
-    let result: T | undefined = undefined;
-    let count = 0;
-    for (let item of this) {
-      if (predicate(item)) {
-        result = item;
-        count++;
-        if (count > 1) {
-          throw new Error("More than one element");
-        }
-      }
-    }
-    if (count == 0) {
-      throw new Error("No such element");
-    }
-    return result as T;
-  }
-
-  /**
    * Returns the single element matching the predicate, or `undefined` if there is
    * no match or more than one match.
    * @param predicate - Called with each element. Defaults to always-true.
    */
-  singleOrNull(predicate: (value: T) => boolean = TruePredicate): T | undefined {
+  single(predicate: (value: T) => boolean = TruePredicate): T | undefined {
     let result: T | undefined = undefined;
     let count = 0;
     for (let item of this) {
@@ -297,7 +246,11 @@ export class Sequence<T> extends Iterator<T> {
    * @typeParam R - The accumulator type.
    */
   fold<R>(initial: R, operation: (acc: R, value: T) => R): R {
-    return this.reduce(operation, initial);
+    let result = initial;
+    for (const item of this) {
+      result = operation(result, item);
+    }
+    return result;
   }
 
   /**
@@ -341,31 +294,6 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   /**
-   * Alias for {@link scan}. Returns a sequence of running accumulator values.
-   * @param initial - The starting accumulator value.
-   * @param operation - Called with `(accumulator, value)` for each element.
-   * @typeParam R - The accumulator type.
-   */
-  runningFold<R>(initial: R, operation: (acc: R, value: T) => R): Sequence<R> {
-    return this.scan(initial, operation);
-  }
-
-  /**
-   * Like `reduce`, but the operation also receives the zero-based element index.
-   * Uses the first element as the initial accumulator.
-   * @throws {Error} If the sequence is empty.
-   * @param operation - Called with `(accumulator, value, index)` for each subsequent element.
-   */
-  reduceIndexed(operation: (acc: T, value: T, index: number) => T): T {
-    let result: T = this.first();
-    let index = 1;
-    for (let item of this) {
-      result = operation(result, item, index++);
-    }
-    return result;
-  }
-
-  /**
    * Returns the number of elements that satisfy the predicate.
    * When called with no argument, returns the total number of elements.
    * @param predicate - Called with each element. Defaults to always-true.
@@ -381,22 +309,11 @@ export class Sequence<T> extends Iterator<T> {
   }
 
   /**
-   * Returns the element at the given zero-based index.
-   * @throws {Error} If the index is out of bounds.
-   * @param index - Zero-based position.
-   */
-  elementAt(index: number): T {
-    return this.elementAtOrElse(index, () => {
-      throw new Error("Index out of bounds: " + index);
-    });
-  }
-
-  /**
    * Returns the element at the given zero-based index, or `undefined` if the index
    * is out of bounds.
    * @param index - Zero-based position.
    */
-  elementAtOrNull(index: number): T | undefined {
+  elementAt(index: number): T | undefined {
     let i = 0;
     for (let item of this) {
       if (i === index) return item;
@@ -469,26 +386,6 @@ export class Sequence<T> extends Iterator<T> {
       index++;
     }
     return result;
-  }
-
-  /**
-   * Returns the last element matching the predicate.
-   * @throws {Error} If no element matches.
-   * @param predicate - Called with each element. Defaults to always-true.
-   */
-  last(predicate: (value: T) => boolean = TruePredicate): T {
-    let last: T | undefined = undefined;
-    let found = false;
-    for (let item of this) {
-      if (predicate(item)) {
-        last = item;
-        found = true;
-      }
-    }
-    if (!found) {
-      throw new Error("No such element");
-    }
-    return last as T;
   }
 
   /**

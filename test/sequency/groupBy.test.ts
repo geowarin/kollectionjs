@@ -22,7 +22,10 @@ describe("groupBy", () => {
       { dept: "eng", name: "Alice" },
       { dept: "eng", name: "Bob" },
       { dept: "hr", name: "Carol" },
-    ).groupBy((it) => it.dept, (it) => it.name);
+    ).groupBy(
+      (it) => it.dept,
+      (it) => it.name,
+    );
 
     expect(map.get("eng")).toEqual(["Alice", "Bob"]);
     expect(map.get("hr")).toEqual(["Carol"]);

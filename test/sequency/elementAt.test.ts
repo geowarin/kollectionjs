@@ -17,7 +17,8 @@ describe("elementAt", () => {
     expect(item).toBe(3);
   });
 
-  it("should throw error when index out of bounds", () => {
-    expect(() => sequenceOf(1, 2, 3).elementAt(3)).toThrow();
+  it("should return undefined when index out of bounds", () => {
+    const item = sequenceOf(1, 2, 3).elementAt(3);
+    expect(item).toBeUndefined();
   });
 });

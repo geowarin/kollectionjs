@@ -7,12 +7,14 @@ describe("single", () => {
     expect(result).toBe(23);
   });
 
-  it("should throw with more than one element", () => {
-    expect(() => sequenceOf(1, 2).single()).toThrow();
+  it("should return undefined with more than one element", () => {
+    const result = sequenceOf(1, 2).single();
+    expect(result).toBeUndefined();
   });
 
-  it("should throw with zero elements", () => {
-    expect(() => emptySequence().single()).toThrow();
+  it("should return undefined with zero elements", () => {
+    const result = emptySequence().single();
+    expect(result).toBeUndefined();
   });
 
   it("should evaluate predicate and return single element", () => {
@@ -20,11 +22,13 @@ describe("single", () => {
     expect(result).toBe(3);
   });
 
-  it("should evaluate predicate and throw with more than one element", () => {
-    expect(() => sequenceOf(1, 2).single((it) => it > 0)).toThrow();
+  it("should evaluate predicate and return undefined with more than one element", () => {
+    const result = sequenceOf(1, 2, 3).single((it) => it > 1);
+    expect(result).toBeUndefined();
   });
 
-  it("should evaluate predicate and throw with zero elements", () => {
-    expect(() => sequenceOf(1, 2, 3).single((it) => it > 3)).toThrow();
+  it("should evaluate predicate and return undefined with zero elements", () => {
+    const result = sequenceOf(1, 2, 3).single((it) => it > 3);
+    expect(result).toBeUndefined();
   });
 });

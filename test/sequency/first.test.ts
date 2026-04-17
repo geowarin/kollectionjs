@@ -9,12 +9,11 @@ describe("first", () => {
     expect(result).toBe(3);
   });
 
-  it("should throw error on empty sequence", () => {
-    expect(() =>
-      sequenceOf(1, 2, 3)
-        .filter((it) => it > 3)
-        .first(),
-    ).toThrow("No such element");
+  it("should return undefined on empty sequence", () => {
+    const result = sequenceOf(1, 2, 3)
+      .filter((it) => it > 3)
+      .first();
+    expect(result).toBeUndefined();
   });
 
   it("should return first element matching predicate", () => {

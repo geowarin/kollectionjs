@@ -17,7 +17,9 @@ describe("sorted", () => {
 
   it("sortedDescending should sort in reverse order", () => {
     expect(sequenceOf("banana", "apple", "cherry").sortedDescending().toArray()).toEqual([
-      "cherry", "banana", "apple",
+      "cherry",
+      "banana",
+      "apple",
     ]);
   });
 });

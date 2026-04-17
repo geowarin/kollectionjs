@@ -3,12 +3,16 @@ import { sequenceOf } from "../../src/Sequence";
 
 describe("sortedWith", () => {
   it("should sort using a comparator", () => {
-    const array = sequenceOf(3, 1, 2).sortedWith((a, b) => a - b).toArray();
+    const array = sequenceOf(3, 1, 2)
+      .sortedWith((a, b) => a - b)
+      .toArray();
     expect(array).toEqual([1, 2, 3]);
   });
 
   it("should sort in descending order with reversed comparator", () => {
-    const array = sequenceOf(3, 1, 2).sortedWith((a, b) => b - a).toArray();
+    const array = sequenceOf(3, 1, 2)
+      .sortedWith((a, b) => b - a)
+      .toArray();
     expect(array).toEqual([3, 2, 1]);
   });
 

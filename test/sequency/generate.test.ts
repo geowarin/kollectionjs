@@ -3,7 +3,9 @@ import { generate } from "../../src/Sequence";
 
 describe("generate", () => {
   it("should generate values from a seed function", () => {
-    const result = generate(1, (x) => x * 2).take(5).toArray();
+    const result = generate(1, (x) => x * 2)
+      .take(5)
+      .toArray();
     expect(result).toEqual([1, 2, 4, 8, 16]);
   });
 

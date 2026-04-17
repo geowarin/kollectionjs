@@ -9,12 +9,11 @@ describe("last", () => {
     expect(result).toBe(3);
   });
 
-  it("should throw error on empty sequence", () => {
-    expect(() =>
-      sequenceOf(1, 2, 3)
-        .filter((it) => it > 3)
-        .last(),
-    ).toThrow("No such element");
+  it("should return undefined on empty sequence", () => {
+    const result = sequenceOf(1, 2, 3)
+      .filter((it) => it > 3)
+      .last();
+    expect(result).toBeUndefined();
   });
 
   it("should return last element matching predicate", () => {
@@ -27,7 +26,8 @@ describe("last", () => {
     expect(result).toBeNull();
   });
 
-  it("should throw when predicate matches no elements", () => {
-    expect(() => sequenceOf(1, 2, 3).last((it) => it > 3)).toThrow("No such element");
+  it("should return undefined when predicate matches no elements", () => {
+    const result = sequenceOf(1, 2, 3).last((it) => it > 3);
+    expect(result).toBeUndefined();
   });
 });
