@@ -10,153 +10,87 @@ Lazy, chainable collection utilities for TypeScript, inspired by Kotlin's sequen
 pnpm add kollectionjs
 ```
 
-## Creating sequences
+## API Reference
 
-```ts
-import { sequenceOf, asSequence, emptySequence, range, generate } from "kollectionjs";
+<!-- API:START -->
+### Factory functions
 
-sequenceOf(1, 2, 3); // from values
-asSequence([1, 2, 3]); // from any Iterable
-emptySequence<number>(); // empty
-range(1, 5); // [1, 2, 3, 4]
-range(0, 10, 2); // [0, 2, 4, 6, 8]
-range(5, 0, -1); // [5, 4, 3, 2, 1]
-generate(1, (x) => x * 2); // 1, 2, 4, 8, 16, ... (infinite — use .take())
-```
+| | Description |
+|---|---|
+| `asSequence` | Wraps any `Iterable` in a `Sequence`. |
+| `concat` | Creates a `Sequence` that lazily concatenates all given iterables in order. |
+| `emptySequence` | Creates an empty `Sequence`. |
+| `generate` | Creates an infinite (or finite) `Sequence` by repeatedly applying `next` to a seed value. |
+| `range` | Creates a `Sequence` of numbers from `start` (inclusive) to `endExclusive` (exclusive), |
+| `sequenceOf` | Creates a `Sequence` from the given arguments. |
 
-## Lazy transformations
+### `Sequence<T>` methods
 
-```ts
-seq.filter(x => x > 1)
-seq.filter((x, index) => index < 3)
-seq.filterNot(x => x > 1)
-seq.filterNotNull()             // narrows to Sequence<NonNullable<T>>
-seq.map(x => x * 2)
-seq.map((x, index) => `${index}: ${x}`)
-seq.mapNotNull(x => x?.value)  // filters out null/undefined results
-seq.flatMap(x => [x, x * 2])
-seq.flatten()                  // Sequence<Iterable<U>> → Sequence<U>
-seq.onEach(x => console.log(x))
-seq.withIndex()                // → Sequence<{ index, value }>
-
-seq.take(3)
-seq.takeWhile(x => x < 5)
-seq.drop(2)
-seq.dropWhile(x => x < 5)
-
-seq.distinct()
-seq.distinctBy(x => x.id)
-seq.sorted()
-seq.sortedDescending()
-seq.sortedBy(x => x.name)
-seq.sortedDescendingBy(x => x.age)
-seq.sortedWith((a, b) => a - b)
-seq.reverse()
-
-seq.plus(4)                    // append element
-seq.plus([4, 5])               // append iterable
-seq.minus(1)                   // remove element
-seq.minus([1, 2])              // remove all matching
-
-seq.zip(other)                 // → Sequence<[T, S]>
-seq.zip(other, (a, b) => ...) // → Sequence<R>
-seq.zipWithNext()              // → Sequence<[T, T]>
-seq.zipWithNext((a, b) => ...) // → Sequence<R>
-seq.chunk(3)                   // → Sequence<T[]> (lazy)
-seq.windowed(3)                // → Sequence<T[]>
-seq.windowed(3, 2)             // step 2
-seq.windowed(3, 1, true)       // include partial windows
-```
-
-## Terminal operations
-
-```ts
-// Collect
-seq.toArray()
-seq.toSet()
-
-// Search
-seq.first()                    // throws if empty
-seq.first(x => x > 2)
-seq.firstOrNull()
-seq.firstOrNull(x => x > 2)
-seq.last()
-seq.lastOrNull()
-seq.find(x => x > 2)          // alias for firstOrNull
-seq.findLast(x => x > 2)
-seq.single()                   // throws if not exactly one match
-seq.singleOrNull()
-seq.elementAt(2)
-seq.elementAtOrNull(2)
-seq.elementAtOrElse(2, i => 0)
-seq.contains(3)
-seq.indexOf(3)
-seq.indexOfFirst(x => x > 2)
-seq.indexOfLast(x => x > 2)
-
-// Test
-seq.all(x => x > 0)           // alias: every()
-seq.any(x => x > 0)           // alias: some()
-seq.none(x => x < 0)
-seq.isEmpty()
-seq.isNotEmpty()
-seq.count()
-seq.count(x => x > 0)
-
-// Aggregate
-seq.fold(0, (acc, x) => acc + x)
-seq.foldIndexed(0, (acc, x, i) => acc + x + i)
-seq.reduce((acc, x) => acc + x) // native Iterator method
-seq.reduceIndexed((acc, x, i) => acc + x + i)
-seq.scan(0, (acc, x) => acc + x)        // → Sequence<R> (includes initial)
-seq.runningFold(0, (acc, x) => acc + x) // alias for scan
-seq.sum()                      // Sequence<number> only
-seq.sumBy(x => x.price)
-seq.average()                  // Sequence<number> only
-seq.min()
-seq.minBy(x => x.age)
-seq.minWith((a, b) => a - b)
-seq.max()
-seq.maxBy(x => x.age)
-seq.maxWith((a, b) => a - b)
-
-// Group / partition
-seq.groupBy(x => x.dept)
-seq.groupBy(x => x.dept, x => x.name)  // Map<K, V[]>
-seq.partition(x => x > 2)              // [T[], T[]]
-seq.chunk(3).toArray()                  // T[][]
-
-// Associate
-seq.associate(x => [x.id, x])
-seq.associateBy(x => x.id)
-seq.associateBy("id")
-seq.associateBy(x => x.id, x => x.name)
-seq.associateWith(x => x.length)       // elements as keys
-
-// Output
-seq.joinToString()
-seq.joinToString({ separator: " | ", prefix: "[", postfix: "]", transform: x => String(x) })
-seq.unzip()                    // Sequence<[A, B]> → [A[], B[]]
-seq.forEach(x => ...)          // native Iterator method
-seq.forEach((x, i) => ...)
-```
-
-## Native Iterator methods
-
-`Sequence<T>` extends the native `Iterator<T>`, so all built-in iterator helpers work directly:
-
-```ts
-seq.every((x) => x > 0);
-seq.some((x) => x > 0);
-seq.find((x) => x > 1);
-seq.reduce((a, b) => a + b);
-seq.flatMap((x) => [x, x * 2]);
-seq.map((x) => x * 2);
-seq.filter((x) => x > 1);
-seq.take(3);
-seq.drop(2);
-seq.toArray();
-```
+| | Description |
+|---|---|
+| `associate` | Returns a `Map` built by applying `transform` to each element and using the |
+| `associateBy` | Returns a `Map` keyed by the result of `keySelector` (or a property name). |
+| `associateWith` | Returns a `Map` where each element is the key and `valueSelector` provides the value. |
+| `average` | Returns the arithmetic mean of a numeric sequence. |
+| `chunk` | Splits the sequence into chunks of at most `chunkSize` elements. |
+| `contains` | Returns `true` if the sequence contains the given element (using `===`). |
+| `count` | Returns the number of elements that satisfy the predicate. |
+| `distinct` | Returns a sequence containing only distinct elements (first occurrence wins). |
+| `distinctBy` | Returns a sequence containing only elements with distinct keys as computed by `selector`. |
+| `drop` | Returns a sequence that skips the first `num` elements. |
+| `dropWhile` | Returns a sequence that skips elements from the start while the predicate holds. |
+| `elementAt` | Returns the element at the given zero-based index, or `undefined` if the index |
+| `elementAtOrElse` | Returns the element at the given zero-based index, or the result of `defaultValue` |
+| `filter` | Returns a sequence containing only the elements that satisfy the predicate. |
+| `filterNot` | Returns a sequence containing only the elements that do **not** satisfy the predicate. |
+| `filterNotNull` | Returns a sequence with all `null` and `undefined` elements removed. |
+| `find` | Returns the first element matching the predicate, or `undefined` if none match. |
+| `first` | Returns the first element matching the predicate, or `undefined` if none match. |
+| `flatMap` | Maps each element to an iterable and flattens the results into a single sequence. |
+| `flatten` | Flattens a sequence of iterables into a single sequence. |
+| `fold` | Accumulates a value by applying `operation` left-to-right, starting from `initial`. |
+| `groupBy` | Groups elements into a `Map` by the key returned by `keySelector`. |
+| `indexOf` | Returns the zero-based index of the first occurrence of `element` (using `===`), |
+| `indexOfFirst` | Returns the zero-based index of the first element matching the predicate, |
+| `indexOfLast` | Returns the zero-based index of the last element matching the predicate, |
+| `isEmpty` | Returns `true` if the sequence contains no elements. |
+| `isNotEmpty` | Returns `true` if the sequence contains at least one element. |
+| `joinToString` | Joins all elements into a single string. |
+| `last` | Returns the last element matching the predicate, or `undefined` if none match. |
+| `map` | Returns a sequence where each element is transformed by `transform`. |
+| `mapNotNull` | Returns a sequence of transformed elements, skipping any `null` or `undefined` results. |
+| `max` | Returns the maximum element using the natural `>` ordering, or `undefined` if the |
+| `maxBy` | Returns the element for which `selector` returns the largest value, or `undefined` |
+| `maxWith` | Returns the maximum element according to the given `compare` function, or `undefined` |
+| `min` | Returns the minimum element using the natural `<` ordering, or `undefined` if the |
+| `minBy` | Returns the element for which `selector` returns the smallest value, or `undefined` |
+| `minus` | Returns a sequence with the given element(s) excluded. |
+| `minWith` | Returns the minimum element according to the given `compare` function, or `undefined` |
+| `none` | Returns `true` if **no** element satisfies the predicate. |
+| `onEach` | Performs the given `action` on each element and returns the same sequence unchanged. |
+| `partition` | Splits the sequence into two arrays: the first contains elements that satisfy |
+| `plus` | Returns a sequence that contains all elements of this sequence followed by |
+| `reverse` | Returns a new sequence with elements in reverse order. |
+| `scan` | Returns a sequence of running accumulator values, starting with `initial`. |
+| `single` | Returns the single element matching the predicate, or `undefined` if there is |
+| `some` | Returns `true` if **any** element satisfies the predicate. |
+| `sorted` | Returns a new sequence with elements sorted in ascending order using natural ordering. |
+| `sortedBy` | Returns a new sequence sorted in ascending order by the key returned by `selector`. |
+| `sortedDescending` | Returns a new sequence with elements sorted in descending order using natural ordering. |
+| `sortedDescendingBy` | Returns a new sequence sorted in descending order by the key returned by `selector`. |
+| `sortedWith` | Returns a new sequence sorted using the given `comparator`. |
+| `sum` | Returns the sum of all elements in a numeric sequence. |
+| `sumBy` | Returns the sum of the values returned by `selector` for each element. |
+| `take` | Returns a sequence containing the first `num` elements. |
+| `takeWhile` | Returns a sequence of elements taken from the start while the predicate holds. |
+| `toMap` | Collects a sequence of `[key, value]` pairs into a `Map`. |
+| `toSet` | Collects all elements into a `Set`. |
+| `unzip` | Unzips a sequence of `[A, B]` pairs into a tuple of two arrays `[A[], B[]]`. |
+| `windowed` | Returns a sequence of sliding windows of the given `size`. |
+| `withIndex` | Returns a sequence of `{ index, value }` pairs, where `index` is the |
+| `zip` | Returns a sequence of pairs built by combining the elements of this sequence |
+| `zipWithNext` | Returns a sequence of pairs of each consecutive element with the next one. |
+<!-- API:END -->
 
 ## Development
 
