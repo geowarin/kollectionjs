@@ -970,6 +970,70 @@ export class Sequence<T> extends Iterator<T> {
     return result;
   }
 
+  /**
+   * Returns a sequence containing only the `[key, value]` pairs whose key satisfies the predicate.
+   * @param predicate - Called with each key.
+   * @typeParam K - The key type.
+   * @typeParam V - The value type.
+   */
+  filterKeys<K, V>(this: Sequence<[K, V]>, predicate: (key: K) => boolean): Sequence<[K, V]> {
+    return this.filter(([k]) => predicate(k));
+  }
+
+  /**
+   * Returns a sequence containing only the `[key, value]` pairs whose value satisfies the predicate.
+   * @param predicate - Called with each value.
+   * @typeParam K - The key type.
+   * @typeParam V - The value type.
+   */
+  filterValues<K, V>(this: Sequence<[K, V]>, predicate: (value: V) => boolean): Sequence<[K, V]> {
+    return this.filter(([, v]) => predicate(v));
+  }
+
+  /**
+   * Returns a sequence of `[key, value]` pairs where each key is transformed by `transform`.
+   * @param transform - Called with each key.
+   * @typeParam K - The original key type.
+   * @typeParam V - The value type.
+   * @typeParam K2 - The transformed key type.
+   */
+  mapKeys<K, V, K2>(this: Sequence<[K, V]>, transform: (key: K) => K2): Sequence<[K2, V]> {
+    return this.map(([k, v]) => [transform(k), v] as [K2, V]);
+  }
+
+  /**
+   * Returns a sequence of `[key, value]` pairs where each value is transformed by `transform`.
+   * @param transform - Called with each value.
+   * @typeParam K - The key type.
+   * @typeParam V - The original value type.
+   * @typeParam V2 - The transformed value type.
+   */
+  mapValues<K, V, V2>(this: Sequence<[K, V]>, transform: (value: V) => V2): Sequence<[K, V2]> {
+    return this.map(([k, v]) => [k, transform(v)] as [K, V2]);
+  }
+
+  /**
+   * Collects a sequence of `[key, value]` pairs into a plain object.
+   *
+   * @example
+   * ```ts
+   * entriesOf({ name: 'yoda' })
+   *   .mapKeys(k => k.toUpperCase())
+   *   .mapValues(v => v.toUpperCase())
+   *   .toObject(); // { NAME: 'YODA' }
+   * ```
+   *
+   * @typeParam K - The key type (must be a valid property key).
+   * @typeParam V - The value type.
+   */
+  toObject<K extends PropertyKey, V>(this: Sequence<[K, V]>): Record<K, V> {
+    const result = {} as Record<K, V>;
+    for (const [key, value] of this) {
+      result[key] = value;
+    }
+    return result;
+  }
+
   private pipe<U>(fn: (this: Iterable<T>) => IterableIterator<U>): Sequence<U> {
     return new Sequence(fn.call(this));
   }
@@ -1062,6 +1126,28 @@ export function range(start: number, endExclusive: number, step: number = 1): Se
         for (let i = start; i > endExclusive; i += step) yield i;
       }
     })(),
+  );
+}
+
+/**
+ * Creates a `Sequence` of `[key, value]` pairs from a plain object, equivalent to
+ * `asSequence(Object.entries(obj))` but with entry-aware methods available (`mapKeys`,
+ * `mapValues`, `toObject`).
+ *
+ * @example
+ * ```ts
+ * entriesOf({ name: 'yoda', side: 'light' })
+ *   .mapKeys(k => k.toUpperCase())
+ *   .mapValues(v => v.toUpperCase())
+ *   .toObject(); // { NAME: 'YODA', SIDE: 'LIGHT' }
+ * ```
+ *
+ * @param obj - The object whose own enumerable string-keyed entries are used.
+ * @typeParam T - The object type.
+ */
+export function entriesOf<T extends object>(obj: T): Sequence<[string & keyof T, T[keyof T]]> {
+  return new Sequence(
+    (Object.entries(obj) as [string & keyof T, T[keyof T]][]).values(),
   );
 }
 

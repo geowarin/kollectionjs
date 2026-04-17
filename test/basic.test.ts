@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sequenceOf } from "../src/Sequence";
+import { asSequence, sequenceOf } from "../src/Sequence";
 import { getIterator } from "../src/utils";
 
 describe("sequence", () => {
