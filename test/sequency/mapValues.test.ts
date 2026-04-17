@@ -13,7 +13,10 @@ describe("mapValues", () => {
     const result = sequenceOf<[string, number]>(["a", 1], ["b", 2])
       .mapValues(v => v * 10)
       .toArray();
-    expect(result).toEqual([["a", 10], ["b", 20]]);
+    expect(result).toEqual([
+      ["a", 10],
+      ["b", 20],
+    ]);
   });
 
   it("should chain with mapKeys", () => {

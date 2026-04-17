@@ -8,7 +8,7 @@ describe("count", () => {
   });
 
   it("should evaluate predicate and count results", () => {
-    const num = sequenceOf(1, 2, 3).count((it) => it > 1);
+    const num = sequenceOf(1, 2, 3).count(it => it > 1);
     expect(num).toBe(2);
   });
 

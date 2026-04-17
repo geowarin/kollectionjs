@@ -8,7 +8,7 @@ describe("groupBy", () => {
     const c = { k: 3, v: 33 };
     const d = { k: 2, v: 222 };
 
-    const map = sequenceOf(a, b, c, d).groupBy((it) => it.k);
+    const map = sequenceOf(a, b, c, d).groupBy(it => it.k);
 
     expect(map.size).toBe(3);
     expect(map.get(1)![0]).toBe(a);
@@ -23,8 +23,8 @@ describe("groupBy", () => {
       { dept: "eng", name: "Bob" },
       { dept: "hr", name: "Carol" },
     ).groupBy(
-      (it) => it.dept,
-      (it) => it.name,
+      it => it.dept,
+      it => it.name,
     );
 
     expect(map.get("eng")).toEqual(["Alice", "Bob"]);

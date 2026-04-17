@@ -3,10 +3,10 @@ import { execSync } from "node:child_process";
 import { resolve } from "node:path";
 import { Application, DeclarationReflection, ReflectionKind, TSConfigReader } from "typedoc";
 
-const ROOT = resolve(import.meta.dirname, "..");
+const ROOT_DIR = resolve(import.meta.dirname, "..");
 
 const app = await Application.bootstrap(
-  { entryPoints: [resolve(ROOT, "src/index.ts")], excludeInternal: true, logLevel: "Error" },
+  { entryPoints: [resolve(ROOT_DIR, "src/index.ts")], excludeInternal: true, logLevel: "Error" },
   [new TSConfigReader()],
 );
 
@@ -15,38 +15,25 @@ if (!project) throw new Error("TypeDoc failed to convert the project");
 
 /** Extract the first description line from a reflection's comment. */
 function getDescription(reflection: DeclarationReflection): string {
-  const summary = reflection.comment?.summary ?? reflection.signatures?.[0]?.comment?.summary;
+  const summary = reflection.signatures?.[0]?.comment?.summary.map(p => p.text).join("");
   if (!summary?.length) return "";
   return summary
-    .map((p) => p.text)
-    .join("")
-    .split("\n")[0]
+    .replaceAll("\n", " ")
     .trim()
-    .replace(/\|/g, "\\|"); // escape pipe so it doesn't break the table
+    .substring(0, summary.indexOf("."))
+    .replaceAll("|", "\\|"); // escape pipe so it doesn't break the table
 }
 
-// Factory functions are top-level kind=Function exports.
-const factories = (project.children ?? [])
-  .filter((c): c is DeclarationReflection => c.kind === ReflectionKind.Function)
-  .map((c) => ({ name: c.name, description: getDescription(c) }));
+let topLevel = project.children ?? [];
+const factories = topLevel
+  .filter(c => c.kind === ReflectionKind.Function)
+  .map(c => ({ name: c.name, description: getDescription(c) }));
 
-// Sequence methods: defined on the class itself (not inherited from Iterator<T>).
-const seqClass = (project.children ?? []).find(
-  (c): c is DeclarationReflection => c.kind === ReflectionKind.Class && c.name === "Sequence",
-);
-const EXCLUDED = new Set(["constructor", "next"]);
-
+const seqClass = topLevel.find(c => c.kind === ReflectionKind.Class && c.name === "Sequence");
 const methods = (seqClass?.children ?? [])
-  .filter(
-    (c): c is DeclarationReflection =>
-      c.kind === ReflectionKind.Method &&
-      !c.inheritedFrom &&
-      !c.flags?.isPrivate &&
-      !EXCLUDED.has(c.name),
-  )
-  .map((c) => ({ name: c.name, description: getDescription(c) }));
-
-// ── build table ───────────────────────────────────────────────────────────────
+  .filter(c => c.kind === ReflectionKind.Method)
+  .map(c => ({ name: c.name, description: getDescription(c) }))
+  .filter(m => m.description);
 
 function buildTable(entries: { name: string; description: string }[]): string {
   const rows = entries.map(({ name, description }) => `| \`${name}\` | ${description} |`);
@@ -57,12 +44,10 @@ const generated =
   `### Factory functions\n\n${buildTable(factories)}\n\n` +
   `### \`Sequence<T>\` methods\n\n${buildTable(methods)}`;
 
-// ── inject into README ────────────────────────────────────────────────────────
-
 const START = "<!-- API:START -->";
 const END = "<!-- API:END -->";
 
-const readme = readFileSync(resolve(ROOT, "README.md"), "utf-8");
+const readme = readFileSync(resolve(ROOT_DIR, "README.md"), "utf-8");
 const startIdx = readme.indexOf(START);
 const endIdx = readme.indexOf(END);
 
@@ -74,8 +59,8 @@ if (startIdx === -1 || endIdx === -1) {
 const updated =
   readme.slice(0, startIdx + START.length) + "\n" + generated + "\n" + readme.slice(endIdx);
 
-writeFileSync(resolve(ROOT, "README.md"), updated);
-execSync("node_modules/.bin/oxfmt --write README.md", { cwd: ROOT });
+writeFileSync(resolve(ROOT_DIR, "README.md"), updated);
+execSync("node_modules/.bin/oxfmt --write README.md", { cwd: ROOT_DIR });
 console.log(
   `Updated README.md — ${factories.length} factory functions, ${methods.length} methods.`,
 );

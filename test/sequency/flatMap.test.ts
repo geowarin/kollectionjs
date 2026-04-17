@@ -4,7 +4,7 @@ import { asSequence, sequenceOf } from "../../src/Sequence";
 describe("flatMap", () => {
   it("should flatten element arrays", () => {
     const array = sequenceOf([1, 2], [3, 4], [5, 6])
-      .flatMap((it) => asSequence(it))
+      .flatMap(it => asSequence(it))
       .toArray();
 
     expect(array.length).toBe(6);

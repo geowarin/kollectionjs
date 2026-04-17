@@ -103,7 +103,7 @@ export class Sequence<T> extends Iterator<T> {
    * @param element - The value to search for.
    */
   contains(element: T): boolean {
-    return this.some((item) => item === element);
+    return this.some(item => item === element);
   }
 
   /**
@@ -585,9 +585,9 @@ export class Sequence<T> extends Iterator<T> {
   minus(data: T | Iterable<T>): Sequence<T> {
     if (isIterable(data)) {
       const exclusions = new Set<T>(data);
-      return this.filter((it) => !exclusions.has(it));
+      return this.filter(it => !exclusions.has(it));
     } else {
-      return this.filter((it) => it !== data);
+      return this.filter(it => it !== data);
     }
   }
 
@@ -1146,9 +1146,7 @@ export function range(start: number, endExclusive: number, step: number = 1): Se
  * @typeParam T - The object type.
  */
 export function entriesOf<T extends object>(obj: T): Sequence<[string & keyof T, T[keyof T]]> {
-  return new Sequence(
-    (Object.entries(obj) as [string & keyof T, T[keyof T]][]).values(),
-  );
+  return new Sequence((Object.entries(obj) as [string & keyof T, T[keyof T]][]).values());
 }
 
 /**

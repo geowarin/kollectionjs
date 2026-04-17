@@ -16,7 +16,7 @@ describe("joinToString", () => {
 
   it("should apply transform to each element", () => {
     const result = sequenceOf({ name: "Alice" }, { name: "Bob" }).joinToString({
-      transform: (it) => it.name,
+      transform: it => it.name,
     });
     expect(result).toBe("Alice, Bob");
   });
@@ -26,7 +26,7 @@ describe("joinToString", () => {
       separator: "-",
       prefix: "(",
       postfix: ")",
-      transform: (it) => String(it * 2),
+      transform: it => String(it * 2),
     });
     expect(result).toBe("(2-4-6)");
   });

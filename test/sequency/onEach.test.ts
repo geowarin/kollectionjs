@@ -5,7 +5,7 @@ describe("onEach", () => {
   it("should call action for each element", () => {
     const array: any[] = [];
     const result = sequenceOf(1, 2, 3)
-      .onEach((it) => array.push(it))
+      .onEach(it => array.push(it))
       .toArray();
     expect(array[0]).toBe(result[0]);
     expect(array[1]).toBe(result[1]);

@@ -6,7 +6,10 @@ describe("filterKeys", () => {
     const result = sequenceOf<[string, number]>(["a", 1], ["b", 2], ["c", 3])
       .filterKeys(k => k !== "b")
       .toArray();
-    expect(result).toEqual([["a", 1], ["c", 3]]);
+    expect(result).toEqual([
+      ["a", 1],
+      ["c", 3],
+    ]);
   });
 
   it("should work with entriesOf", () => {

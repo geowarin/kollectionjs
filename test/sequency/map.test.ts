@@ -4,7 +4,7 @@ import { sequenceOf } from "../../src/Sequence";
 describe("map", () => {
   it("should map numbers to strings", () => {
     const array = sequenceOf(1, 2, 3)
-      .map((it) => `num ${it}`)
+      .map(it => `num ${it}`)
       .toArray();
 
     expect(array.length).toBe(3);

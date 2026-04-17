@@ -7,7 +7,7 @@ describe("associateBy", () => {
     const b = { k: 2, v: 22 };
     const c = { k: 3, v: 33 };
 
-    const map = sequenceOf(a, b, c).associateBy((it) => it.k);
+    const map = sequenceOf(a, b, c).associateBy(it => it.k);
 
     expect(map.size).toBe(3);
     expect(map.get(1)).toBe(a);
@@ -34,8 +34,8 @@ describe("associateBy", () => {
     const c = { k: 3, v: 33 };
 
     const map = sequenceOf(a, b, c).associateBy(
-      (it) => it.k,
-      (it) => it.v,
+      it => it.k,
+      it => it.v,
     );
 
     expect(map.size).toBe(3);
@@ -49,7 +49,7 @@ describe("associateBy", () => {
     const b = { k: 2, v: 22 };
     const c = { k: 3, v: 33 };
 
-    const map = sequenceOf(a, b, c).associateBy("k", (it) => it.v);
+    const map = sequenceOf(a, b, c).associateBy("k", it => it.v);
 
     expect(map.size).toBe(3);
     expect(map.get(1)).toBe(11);
@@ -64,8 +64,8 @@ describe("associateBy", () => {
     const d = { k: 2, v: 222 };
 
     const map = sequenceOf(a, b, c, d).associateBy(
-      (it) => it.k,
-      (it) => it.v,
+      it => it.k,
+      it => it.v,
     );
 
     expect(map.size).toBe(3);

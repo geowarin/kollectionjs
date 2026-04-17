@@ -9,7 +9,7 @@ describe("mapNotNull", () => {
     const a4 = { a: 4 };
 
     const array = sequenceOf<{ a: number | null }>(a1, a2, a3, a4)
-      .mapNotNull((it) => it.a)
+      .mapNotNull(it => it.a)
       .toArray();
 
     expect(array.length).toBe(2);
@@ -19,7 +19,7 @@ describe("mapNotNull", () => {
 
   it("should filter out undefined values", () => {
     const array = sequenceOf(1, 2, 3, 4)
-      .mapNotNull((it) => (it % 2 === 0 ? it : undefined))
+      .mapNotNull(it => (it % 2 === 0 ? it : undefined))
       .toArray();
 
     expect(array.length).toBe(2);

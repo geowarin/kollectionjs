@@ -13,7 +13,10 @@ describe("mapKeys", () => {
     const result = sequenceOf<[string, number]>(["a", 1], ["b", 2])
       .mapKeys(k => k.toUpperCase())
       .toArray();
-    expect(result).toEqual([["A", 1], ["B", 2]]);
+    expect(result).toEqual([
+      ["A", 1],
+      ["B", 2],
+    ]);
   });
 
   it("should chain with mapValues", () => {
