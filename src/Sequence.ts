@@ -245,26 +245,11 @@ export class Sequence<T> extends Iterator<T> {
    * @param operation - Called with `(accumulator, value)` for each element.
    * @typeParam R - The accumulator type.
    */
-  fold<R>(initial: R, operation: (acc: R, value: T) => R): R {
-    let result = initial;
-    for (const item of this) {
-      result = operation(result, item);
-    }
-    return result;
-  }
-
-  /**
-   * Like {@link fold}, but the operation also receives the zero-based element index.
-   * @param initial - The starting accumulator value.
-   * @param operation - Called with `(accumulator, value, index)` for each element.
-   * @typeParam R - The accumulator type.
-   */
-  foldIndexed<R>(initial: R, operation: (acc: R, value: T, index: number) => R): R {
+  fold<R>(initial: R, operation: (acc: R, value: T, index: number) => R): R {
     let result = initial;
     let index = 0;
-    for (let item of this) {
-      result = operation(result, item, index);
-      index++;
+    for (const item of this) {
+      result = operation(result, item, index++);
     }
     return result;
   }
