@@ -49,7 +49,7 @@ seq.distinctBy(x => x.id)
 seq.sorted()
 seq.sortedDescending()
 seq.sortedBy(x => x.name)
-seq.sortedByDescending(x => x.age)
+seq.sortedDescendingBy(x => x.age)
 seq.sortedWith((a, b) => a - b)
 seq.reverse()
 

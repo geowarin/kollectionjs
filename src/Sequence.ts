@@ -927,7 +927,7 @@ export class Sequence<T> extends Iterator<T> {
    * @param selector - Extracts a comparable sort key from each element.
    * @typeParam R - The key type.
    */
-  sortedByDescending<R>(selector: (value: T) => R): Sequence<T> {
+  sortedDescendingBy<R>(selector: (value: T) => R): Sequence<T> {
     return asSequence(
       this.toArray().sort((a, b) => {
         const ka = selector(a);
