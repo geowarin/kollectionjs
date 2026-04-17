@@ -686,8 +686,8 @@ export class Sequence<T> extends Iterator<T> {
    * ```
    */
   windowed(size: number, step: number = 1, partialWindows: boolean = false): Sequence<T[]> {
-    if (size < 1) throw new Error("size must be > 0 but is " + size);
-    if (step < 1) throw new Error("step must be > 0 but is " + step);
+    if (size < 1) throw new RangeError(`size must be > 0 but is ${size}`);
+    if (step < 1) throw new RangeError(`step must be > 0 but is ${step}`);
     const arr = this.toArray();
     return new Sequence(
       (function* () {
@@ -709,7 +709,7 @@ export class Sequence<T> extends Iterator<T> {
    */
   chunk(chunkSize: number): Sequence<T[]> {
     if (chunkSize < 1) {
-      throw new Error("chunkSize must be > 0 but is " + chunkSize);
+      throw new RangeError(`chunkSize must be > 0 but is ${chunkSize}`);
     }
     return this.pipe(function* (this: Iterable<T>) {
       let chunk: T[] = [];
@@ -1053,7 +1053,7 @@ export function concat<T>(...iterables: Iterable<T>[]): Sequence<T> {
  * @throws {Error} If `step` is `0`.
  */
 export function range(start: number, endExclusive: number, step: number = 1): Sequence<number> {
-  if (step === 0) throw new Error("step must not be zero");
+  if (step === 0) throw new RangeError("step must not be zero");
   return new Sequence(
     (function* () {
       if (step > 0) {
