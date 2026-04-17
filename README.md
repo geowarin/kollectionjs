@@ -12,6 +12,18 @@ Github repo: https://github.com/geowarin/kollectionjs
 pnpm add kollectionjs
 ```
 
+## Example usage
+
+```ts
+const sequence = sequenceOf(1, 2, 3);
+let result = sequence
+  .map((it) => it * 2)
+  .filter((it) => it % 3 == 0)
+  .toArray();
+
+expect(result).toEqual([6]);
+```
+
 ## API Reference
 
 Full API documentation is available [here](https://geowarin.com/kollectionjs/).
