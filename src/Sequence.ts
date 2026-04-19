@@ -1026,8 +1026,10 @@ export class Sequence<T> extends Iterator<T> {
    * @typeParam K - The key type (must be a valid property key).
    * @typeParam V - The value type.
    */
-  toObject<K extends PropertyKey, V>(this: Sequence<[K, V]>): Record<K, V> {
-    const result = {} as Record<K, V>;
+  toObject<E extends [PropertyKey, unknown]>(this: Sequence<E>): FromEntries<E>;
+  toObject<K extends PropertyKey, V>(this: Sequence<[K, V]>): Record<K, V>;
+  toObject(this: Sequence<[PropertyKey, unknown]>): object {
+    const result: Record<PropertyKey, unknown> = {};
     for (const [key, value] of this) {
       result[key] = value;
     }
@@ -1129,6 +1131,9 @@ export function range(start: number, endExclusive: number, step: number = 1): Se
   );
 }
 
+type ObjectEntry<T extends object> = { [K in keyof T]: [K, T[K]] }[keyof T];
+type FromEntries<T extends [PropertyKey, unknown]> = { [E in T as E[0]]: E[1] };
+
 /**
  * Creates a `Sequence` of `[key, value]` pairs from a plain object, equivalent to
  * `asSequence(Object.entries(obj))` but with entry-aware methods available (`mapKeys`,
@@ -1145,8 +1150,8 @@ export function range(start: number, endExclusive: number, step: number = 1): Se
  * @param obj - The object whose own enumerable string-keyed entries are used.
  * @typeParam T - The object type.
  */
-export function entriesOf<T extends object>(obj: T): Sequence<[string & keyof T, T[keyof T]]> {
-  return new Sequence((Object.entries(obj) as [string & keyof T, T[keyof T]][]).values());
+export function entriesOf<T extends object>(obj: T): Sequence<ObjectEntry<T>> {
+  return new Sequence((Object.entries(obj) as ObjectEntry<T>[]).values());
 }
 
 /**

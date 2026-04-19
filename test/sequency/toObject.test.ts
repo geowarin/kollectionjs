@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, expectTypeOf } from "vitest";
 import { entriesOf, sequenceOf } from "../../src/Sequence";
 
 describe("toObject", () => {
@@ -8,6 +8,12 @@ describe("toObject", () => {
       .mapValues(v => v.toUpperCase())
       .toObject();
     expect(result).toEqual({ NAME: "YODA" });
+  });
+
+  it("should keep types of the original object", () => {
+    let jedi = { name: "yoda", age: 900 };
+    const result = entriesOf(jedi).toObject();
+    expectTypeOf(result).toEqualTypeOf<typeof jedi>();
   });
 
   it("should work on a sequence of pairs directly", () => {
