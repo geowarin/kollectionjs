@@ -1,6 +1,6 @@
 {
   "name": "kollectionjs",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": false,
   "description": "Collection utilities inspired by kotlin for javascript",
   "license": "MIT",
