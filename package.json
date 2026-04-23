@@ -5,12 +5,13 @@
   "description": "Collection utilities inspired by kotlin for javascript",
   "license": "MIT",
   "author": "Geoffroy Warin",
-  "repository": "https://geowarin/kollectionjs",
+  "repository": "geowarin/kollectionjs",
   "files": [
     "dist"
   ],
+  "type": "module",
   "exports": {
-    ".": "./dist/index.mjs",
+    ".": "./dist/index.js",
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -26,9 +27,10 @@
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
-    "@typescript/native-preview": "7.0.0-dev.20260416.2",
+    "@typescript/native-preview": "7.0.0-dev.20260421.2",
     "bumpp": "^11.0.1",
     "oxfmt": "^0.45.0",
+    "publint": "^0.3.18",
     "tsdown": "^0.21.7",
     "typedoc": "^0.28.19",
     "typedoc-github-theme": "^0.4.0",

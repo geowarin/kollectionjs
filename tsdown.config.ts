@@ -4,4 +4,5 @@ export default defineConfig({
   platform: "neutral",
   dts: true,
   exports: true,
+  publint: true,
 });
