@@ -6,6 +6,9 @@ Lazy, chainable collection utilities for TypeScript, inspired by Kotlin's sequen
 
 Github repo: https://github.com/geowarin/kollectionjs
 
+![npm](https://img.shields.io/npm/v/kollectionjs)
+![bundle size](https://deno.bundlejs.com/badge?q=kollectionjs@2.0.0)
+
 ## Installation
 
 ```sh
