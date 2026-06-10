@@ -41,11 +41,7 @@ export class Sequence<T> extends Iterator<T> {
    * @param predicate - Test applied to each element. Defaults to always-true.
    */
   some(predicate: (value: T, index: number) => unknown = TruePredicate): boolean {
-    let index = 0;
-    for (const item of this) {
-      if (predicate(item, index++)) return true;
-    }
-    return false;
+    return super.some(predicate);
   }
 
   /**
@@ -89,13 +85,19 @@ export class Sequence<T> extends Iterator<T> {
   /**
    * Returns the first element matching the predicate, or `undefined` if none match.
    * When called with no argument, returns the first element or `undefined` for an empty sequence.
-   * @param predicate - Test applied to each element. Defaults to always-true.
+   * @param predicate - Called with `(value, index)` for each element. Defaults to always-true.
    */
-  first(predicate: (value: T) => boolean = TruePredicate): T | undefined {
-    for (let item of this) {
-      if (predicate(item)) return item;
-    }
-    return undefined;
+  find(predicate: (value: T, index: number) => unknown = TruePredicate): T | undefined {
+    return super.find(predicate);
+  }
+
+  /**
+   * Returns the first element matching the predicate, or `undefined` if none match.
+   * When called with no argument, returns the first element or `undefined` for an empty sequence.
+   * @param predicate - Called with `(value, index)` for each element. Defaults to always-true.
+   */
+  first(predicate: (value: T, index: number) => boolean = TruePredicate): T | undefined {
+    return super.find(predicate);
   }
 
   /**
@@ -103,7 +105,7 @@ export class Sequence<T> extends Iterator<T> {
    * @param element - The value to search for.
    */
   contains(element: T): boolean {
-    return this.some(item => item === element);
+    return super.some(item => item === element);
   }
 
   /**
@@ -161,19 +163,6 @@ export class Sequence<T> extends Iterator<T> {
    */
   filterNotNull(): Sequence<NonNullable<T>> {
     return new Sequence(super.filter((it): it is NonNullable<T> => it != null));
-  }
-
-  /**
-   * Returns the first element matching the predicate, or `undefined` if none match.
-   * When called with no argument, returns the first element or `undefined` for an empty sequence.
-   * @param predicate - Called with `(value, index)` for each element. Defaults to always-true.
-   */
-  find(predicate: (value: T, index: number) => unknown = TruePredicate): T | undefined {
-    let index = 0;
-    for (const item of this) {
-      if (predicate(item, index++)) return item;
-    }
-    return undefined;
   }
 
   /**
